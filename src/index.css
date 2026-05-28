@@ -1,0 +1,117 @@
+@import "tailwindcss";
+
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Inter:wght@100..900&display=swap');
+
+@theme {
+  --color-background: #0C0F14;
+  --color-surface-container-lowest: #050608;
+  --color-surface-container-low: #0f131a;
+  --color-surface-container: #141822;
+  --color-surface-container-high: #1c212e;
+  --color-surface-container-highest: #283042;
+  --color-surface: #0C0F14;
+  --color-surface-dim: #050608;
+  --color-surface-variant: #283042;
+  --color-surface-bright: #313a4f;
+  
+  --color-on-surface: #E2E8F0;
+  --color-on-surface-variant: #94A3B8;
+  --color-inverse-surface: #E2E8F0;
+  --color-inverse-on-surface: #0f131a;
+  
+  --color-primary-fixed-dim: #4ADE80;
+  --color-primary-container: #4ADE80;
+  --color-primary: #86EFAC;
+  --color-on-primary: #052e16;
+  
+  --color-secondary-container: #3B82F6;
+  --color-secondary: #93C5FD;
+  --color-on-secondary: #00224d;
+  --color-secondary-fixed-dim: #3B82F6;
+  
+  --color-tertiary-container: #ff9d00;
+  --color-tertiary: #FFE4E6;
+  --color-on-tertiary-container: #4c0519;
+  --color-tertiary-fixed-dim: #FACC15;
+  
+  --color-error: #F87171;
+  --color-error-container: #7f1d1d;
+  
+  --font-sans: "Inter", sans-serif;
+  --font-headline: "Geist", sans-serif;
+}
+
+@utility glass-panel {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+@utility card-gradient {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(74, 222, 128, 0.08) 100%);
+}
+
+@utility glow-green {
+  box-shadow: 0 0 20px rgba(74, 222, 128, 0.2);
+}
+
+@utility neon-glow-primary {
+  box-shadow: 0 0 15px rgba(74, 222, 128, 0.25);
+}
+
+@utility neon-glow-primary-hover {
+  transition: all 0.3s ease;
+  &:hover {
+    box-shadow: 0 0 25px rgba(74, 222, 128, 0.55);
+  }
+}
+
+@utility neon-glow-secondary {
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.25);
+}
+
+@utility font-brand-italic {
+  font-family: "Geist", sans-serif;
+  font-style: italic;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px) translateX(0px); opacity: 0.35; }
+  50% { transform: translateY(-40px) translateX(20px); opacity: 0.65; }
+}
+
+@keyframes pulse-ring {
+  0% { transform: scale(0.95); opacity: 0.8; }
+  50% { transform: scale(1.15); opacity: 0.4; }
+  100% { transform: scale(0.95); opacity: 0.8; }
+}
+
+.floating-orb {
+  animation: float 14s ease-in-out infinite;
+}
+
+.floating-orb-delayed {
+  animation: float 18s ease-in-out infinite reverse;
+}
+
+.pulse-dot {
+  animation: pulse-ring 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(10, 14, 24, 0.5);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(42, 229, 0, 0.25);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(42, 229, 0, 0.5);
+}
+
