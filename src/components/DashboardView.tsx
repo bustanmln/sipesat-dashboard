@@ -6,7 +6,8 @@
 import React, { useState } from 'react';
 import { 
   QrCode, BatteryCharging, PenTool, Container, Droplets, 
-  ChevronRight, ArrowUpRight, CheckCircle2, RefreshCw, X 
+  ChevronRight, ArrowUpRight, CheckCircle2, RefreshCw, X,
+  Camera, Video, Wifi, Settings, Sparkles
 } from 'lucide-react';
 import { TransactionItem, BinCapacity } from '../types';
 
@@ -27,6 +28,83 @@ export default function DashboardView({
 }: DashboardViewProps) {
   const [showQrModal, setShowQrModal] = useState(false);
   const [selectedTx, setSelectedTx] = useState<TransactionItem | null>(null);
+
+  // Camera Integration states
+  const [cameraMode, setCameraMode] = useState<'simulation' | 'ip'>(() => {
+    return (localStorage.getItem('sipesat_camera_mode') as 'simulation' | 'ip') || 'simulation';
+  });
+  const [ipUrl, setIpUrl] = useState(() => {
+    return localStorage.getItem('sipesat_ip_url') || 'http://192.168.1.100:8080/stream.mjpg';
+  });
+  const [isEditingIp, setIsEditingIp] = useState(false);
+  const [detectionState, setDetectionState] = useState<{
+    status: 'idle' | 'scanning' | 'detected';
+    item: string | null;
+    confidence: number | null;
+    type: 'battery' | 'atk' | 'box' | 'bottle' | null;
+  }>({
+    status: 'idle',
+    item: null,
+    confidence: null,
+    type: null,
+  });
+
+  const handleCameraModeChange = (mode: 'simulation' | 'ip') => {
+    setCameraMode(mode);
+    localStorage.setItem('sipesat_camera_mode', mode);
+  };
+
+  const handleIpUrlSave = (url: string) => {
+    setIpUrl(url);
+    localStorage.setItem('sipesat_ip_url', url);
+    setIsEditingIp(false);
+  };
+
+  const handleSimulateWithDetection = () => {
+    if (detectionState.status !== 'idle') return;
+
+    const types: ('battery' | 'atk' | 'box' | 'bottle')[] = ['battery', 'atk', 'box', 'bottle'];
+    const selectedType = types[Math.floor(Math.random() * types.length)];
+    
+    const itemsMap = {
+      battery: { name: 'Baterai Litium', confidence: 98.4 },
+      atk: { name: 'Alat Tulis / Pen', confidence: 96.2 },
+      box: { name: 'Kardus Box', confidence: 94.7 },
+      bottle: { name: 'Botol Plastik PET', confidence: 99.1 },
+    };
+
+    const selectedItem = itemsMap[selectedType];
+
+    // Start scanning
+    setDetectionState({
+      status: 'scanning',
+      item: null,
+      confidence: null,
+      type: selectedType,
+    });
+
+    // After 1 second, mark as detected
+    setTimeout(() => {
+      setDetectionState({
+        status: 'detected',
+        item: selectedItem.name,
+        confidence: selectedItem.confidence,
+        type: selectedType,
+      });
+
+      // After another 1.2 seconds, trigger the actual sorting and go back to idle
+      setTimeout(() => {
+        onTriggerWasteSim();
+        setDetectionState({
+          status: 'idle',
+          item: null,
+          confidence: null,
+          type: null,
+        });
+      }, 1200);
+
+    }, 1000);
+  };
 
   // Map transaction type to details
   const getTxConfig = (type: string) => {
@@ -61,11 +139,12 @@ export default function DashboardView({
         
         {/* Quick simulator shortcut button to make the app feel alive */}
         <button
-          onClick={onTriggerWasteSim}
-          className="flex items-center gap-2 px-4 py-2 text-xs font-semibold font-headline bg-primary/10 hover:bg-primary/25 text-primary border border-primary/20 rounded-lg transition-all"
+          onClick={handleSimulateWithDetection}
+          disabled={detectionState.status !== 'idle'}
+          className="flex items-center gap-2 px-4 py-2 text-xs font-semibold font-headline bg-primary/10 hover:bg-primary/25 text-primary border border-primary/20 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <RefreshCw className="w-3.5 h-3.5" />
-          Simulate Sorting Input
+          <RefreshCw className={`w-3.5 h-3.5 ${detectionState.status !== 'idle' ? 'animate-spin' : ''}`} />
+          {detectionState.status === 'scanning' ? 'Scanning Chute...' : detectionState.status === 'detected' ? 'Sorting Item...' : 'Simulate Sorting Input'}
         </button>
       </div>
 
@@ -189,32 +268,227 @@ export default function DashboardView({
           </div>
         </div>
 
-        {/* System Health Card (4-cols) */}
-        <div className="lg:col-span-4 glass-panel bg-white/3 rounded-xl p-6 flex flex-col justify-between border border-white/10">
-          <div>
-            <p className="text-xs text-white/50 uppercase tracking-widest font-bold font-headline mb-4">
-              System Health
-            </p>
-            <div className="space-y-4">
-              <div className="flex justify-between items-center text-sm border-b border-white/5 pb-2">
-                <span className="text-white/60 font-medium font-sans">Edge AI Core</span>
-                <span className="text-primary-fixed-dim font-bold">Optimal</span>
+        {/* Right Sidebar Column (4-cols) */}
+        <div className="lg:col-span-4 flex flex-col gap-6">
+          
+          {/* Raspberry Pi 4B Camera Feed Card */}
+          <div className="glass-panel bg-white/3 rounded-xl p-5 border border-white/10 flex flex-col justify-between group overflow-hidden relative min-h-[350px]">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-primary-fixed-dim/5 rounded-full blur-2xl pointer-events-none"></div>
+            
+            <div className="flex justify-between items-center mb-3">
+              <div className="flex items-center gap-2">
+                <Camera className="w-4 h-4 text-primary-fixed-dim" />
+                <span className="text-xs font-bold tracking-wider text-white uppercase font-headline">
+                  Pi Camera Feed
+                </span>
               </div>
-              <div className="flex justify-between items-center text-sm border-b border-white/5 pb-2">
-                <span className="text-white/60 font-medium font-sans">Bin Connectivity</span>
-                <span className="text-primary-fixed-dim font-bold">Stable</span>
-              </div>
-              <div className="flex justify-between items-center text-sm pb-2">
-                <span className="text-white/60 font-medium font-sans">Cloud API</span>
-                <span className="text-[#FACC15] font-bold">Latency +12ms</span>
+              
+              <div className="flex items-center gap-1.5 bg-black/40 px-2 py-0.5 rounded border border-white/5">
+                <span className={`w-2 h-2 rounded-full ${
+                  detectionState.status === 'scanning' 
+                    ? 'bg-[#facc15] animate-pulse' 
+                    : detectionState.status === 'detected' 
+                      ? 'bg-primary-fixed-dim pulse-dot' 
+                      : 'bg-red-500 animate-pulse'
+                }`}></span>
+                <span className="text-[10px] font-mono font-bold text-white uppercase">
+                  {detectionState.status === 'scanning' ? 'SCAN' : detectionState.status === 'detected' ? 'LOCK' : 'LIVE'}
+                </span>
               </div>
             </div>
+
+            {/* Camera Viewport */}
+            <div className="relative aspect-video w-full rounded-lg bg-[#0a0d14] border border-white/10 overflow-hidden flex items-center justify-center font-mono">
+              {cameraMode === 'simulation' ? (
+                <div className="absolute inset-0 w-full h-full flex flex-col justify-center items-center overflow-hidden">
+                  {detectionState.status === 'scanning' && (
+                    <div className="absolute left-0 w-full h-[2px] bg-primary-fixed-dim/80 shadow-[0_0_8px_#4ade80] animate-scan z-20"></div>
+                  )}
+                  
+                  <div className="w-full h-full relative">
+                    <div className="absolute inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:16px_16px] opacity-40"></div>
+                    
+                    <div className="absolute top-3 left-3 w-4 h-4 border-t-2 border-l-2 border-white/20"></div>
+                    <div className="absolute top-3 right-3 w-4 h-4 border-t-2 border-r-2 border-white/20"></div>
+                    <div className="absolute bottom-3 left-3 w-4 h-4 border-b-2 border-l-2 border-white/20"></div>
+                    <div className="absolute bottom-3 right-3 w-4 h-4 border-b-2 border-r-2 border-white/20"></div>
+                    
+                    <div className="absolute top-2 left-3 text-[9px] text-white/40 flex flex-col gap-0.5 select-none">
+                      <span>CAM-01 [RASPBERRY_PI_4B]</span>
+                      <span>192.168.1.92</span>
+                    </div>
+                    
+                    <div className="absolute top-2 right-3 text-[9px] text-white/40 text-right flex flex-col gap-0.5 select-none">
+                      <span>AI-NET: V1.0-STABLE</span>
+                      <span>FPS: {detectionState.status === 'scanning' ? '54.2' : '60.0'}</span>
+                    </div>
+
+                    {detectionState.status === 'detected' && detectionState.type && (
+                      <div className="absolute top-[25%] left-[25%] w-[50%] h-[50%] border-2 border-primary shadow-[0_0_15px_rgba(74,222,128,0.4)] rounded flex flex-col justify-between p-1.5 animate-pulse z-10 bg-primary/5">
+                        <div className="flex justify-between items-start">
+                          <span className="text-[9px] font-bold text-white bg-primary px-1.5 py-0.5 rounded leading-none uppercase tracking-wider">
+                            {detectionState.item}
+                          </span>
+                          <span className="text-[8px] font-mono text-primary bg-black/60 px-1 py-0.5 rounded leading-none">
+                            {(detectionState.confidence || 0).toFixed(1)}%
+                          </span>
+                        </div>
+                        <div className="text-[8px] text-primary-fixed-dim text-right font-bold uppercase tracking-widest font-mono">
+                          TARGET LOCKED
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="absolute inset-0 flex flex-col items-center justify-center z-10">
+                      {detectionState.status === 'scanning' && (
+                        <div className="flex flex-col items-center gap-1.5">
+                          <RefreshCw className="w-6 h-6 text-primary-fixed-dim animate-spin" />
+                          <span className="text-[10px] font-bold tracking-widest text-primary-fixed-dim uppercase bg-primary/10 px-2 py-0.5 rounded border border-primary/20">
+                            Analysing Chute...
+                          </span>
+                        </div>
+                      )}
+                      {detectionState.status === 'idle' && (
+                        <div className="flex flex-col items-center gap-1 text-center">
+                          <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/30 border border-white/5">
+                            <Video className="w-5 h-5 text-white/30" />
+                          </div>
+                          <span className="text-[10px] font-bold text-white/40 tracking-wider uppercase mt-1">
+                            No Object Spotted
+                          </span>
+                          <span className="text-[9px] text-white/20 select-none">
+                            Click Simulate to start sorting
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="absolute inset-0 w-full h-full bg-black flex items-center justify-center overflow-hidden">
+                  <img 
+                    src={ipUrl} 
+                    alt="Raspberry Pi Camera Stream" 
+                    className="w-full h-full object-cover" 
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                      const parent = e.currentTarget.parentElement;
+                      if (parent) {
+                        const fallback = parent.querySelector('.stream-fallback');
+                        if (fallback) fallback.classList.remove('hidden');
+                      }
+                    }}
+                  />
+                  
+                  <div className="stream-fallback hidden absolute inset-0 flex flex-col items-center justify-center p-4 text-center bg-black/90">
+                    <Wifi className="w-7 h-7 text-error/70 mb-2" />
+                    <p className="text-[11px] text-white font-bold leading-tight uppercase tracking-wider">Stream Connection Failed</p>
+                    <p className="text-[9px] text-on-surface-variant opacity-60 mt-1 max-w-[200px]">
+                      Pastikan Raspberry Pi online dan menyajikan mjpg-streamer di:
+                    </p>
+                    <code className="text-[9px] bg-white/5 border border-white/10 px-1.5 py-0.5 rounded mt-2 text-primary max-w-full truncate font-mono select-all">
+                      {ipUrl}
+                    </code>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Mode Switch and Settings bar */}
+            <div className="mt-3 pt-3 border-t border-white/5">
+              {isEditingIp ? (
+                <div className="space-y-2">
+                  <label className="block text-[10px] text-on-surface-variant font-bold uppercase tracking-wider">
+                    Raspberry Pi Stream URL
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      defaultValue={ipUrl}
+                      id="camera_ip_input"
+                      className="flex-1 bg-surface-container border border-white/10 rounded-lg py-1 px-2.5 text-xs text-white font-mono"
+                      placeholder="http://192.168.1.100:8080/stream.mjpg"
+                    />
+                    <button
+                      onClick={() => {
+                        const input = document.getElementById('camera_ip_input') as HTMLInputElement;
+                        if (input) handleIpUrlSave(input.value);
+                      }}
+                      className="px-2.5 bg-primary text-on-primary font-headline text-xs font-bold rounded-lg"
+                    >
+                      Save
+                    </button>
+                    <button
+                      onClick={() => setIsEditingIp(false)}
+                      className="px-2.5 bg-white/5 text-white/60 border border-white/10 text-xs rounded-lg"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex justify-between items-center text-xs">
+                  <div className="flex rounded-lg bg-surface-container-low p-1 border border-white/5">
+                    <button
+                      onClick={() => handleCameraModeChange('simulation')}
+                      className={`px-2.5 py-1 text-[10px] font-bold rounded-md font-headline transition-all ${cameraMode === 'simulation' ? 'bg-primary/10 text-primary border border-primary/20' : 'text-on-surface-variant'}`}
+                    >
+                      AI Sim
+                    </button>
+                    <button
+                      onClick={() => handleCameraModeChange('ip')}
+                      className={`px-2.5 py-1 text-[10px] font-bold rounded-md font-headline transition-all ${cameraMode === 'ip' ? 'bg-primary/10 text-primary border border-primary/20' : 'text-on-surface-variant'}`}
+                    >
+                      IP Cam
+                    </button>
+                  </div>
+
+                  {cameraMode === 'ip' ? (
+                    <button
+                      onClick={() => setIsEditingIp(true)}
+                      className="p-1 px-2 text-[10px] font-semibold text-secondary-fixed-dim hover:text-white bg-[#00dbe9]/10 rounded border border-[#00dbe9]/20 flex items-center gap-1 transition-all"
+                    >
+                      <Settings className="w-3 h-3" />
+                      Configure IP
+                    </button>
+                  ) : (
+                    <div className="text-[10px] font-bold text-primary-fixed-dim/75 font-mono select-none flex items-center gap-1">
+                      <Sparkles className="w-3.5 h-3.5" />
+                      Object Detection Active
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
-          
-          <div className="pt-4 mt-6 border-t border-white/5 flex gap-2">
-            <div className="flex-1 h-1 bg-[#4ADE80] rounded-full pulse-dot"></div>
-            <div className="flex-1 h-1 bg-[#4ADE80] rounded-full"></div>
-            <div className="flex-1 h-1 bg-white/10 rounded-full"></div>
+
+          {/* System Health Card */}
+          <div className="glass-panel bg-white/3 rounded-xl p-6 flex flex-col justify-between border border-white/10">
+            <div>
+              <p className="text-xs text-white/50 uppercase tracking-widest font-bold font-headline mb-4">
+                System Health
+              </p>
+              <div className="space-y-4">
+                <div className="flex justify-between items-center text-sm border-b border-white/5 pb-2">
+                  <span className="text-white/60 font-medium font-sans">Edge AI Core</span>
+                  <span className="text-primary-fixed-dim font-bold">Optimal</span>
+                </div>
+                <div className="flex justify-between items-center text-sm border-b border-white/5 pb-2">
+                  <span className="text-white/60 font-medium font-sans">Bin Connectivity</span>
+                  <span className="text-primary-fixed-dim font-bold">Stable</span>
+                </div>
+                <div className="flex justify-between items-center text-sm pb-2">
+                  <span className="text-white/60 font-medium font-sans">Cloud API</span>
+                  <span className="text-[#FACC15] font-bold">Latency +12ms</span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="pt-4 mt-6 border-t border-white/5 flex gap-2">
+              <div className="flex-1 h-1 bg-[#4ADE80] rounded-full pulse-dot"></div>
+              <div className="flex-1 h-1 bg-[#4ADE80] rounded-full"></div>
+              <div className="flex-1 h-1 bg-white/10 rounded-full"></div>
+            </div>
           </div>
         </div>
       </div>
