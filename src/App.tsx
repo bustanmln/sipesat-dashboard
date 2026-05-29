@@ -3,8 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { LayoutDashboard, BarChart3, Binary, LogIn, Sparkles, RefreshCw, AlertCircle } from 'lucide-react';
+import { ref, onValue } from 'firebase/database';
+import { db } from '../firebase';
 import Sidebar from './components/Sidebar';
 import TopBar from './components/TopBar';
 import LoginView from './components/LoginView';
@@ -35,6 +37,87 @@ export default function App() {
 
   // Integrated live balance
   const [balance, setBalance] = useState<number>(25000);
+
+  const lastStatusLog = useRef<string>('');
+
+  // Firebase Realtime Database Synchronization
+  useEffect(() => {
+    const sipesatRef = ref(db, 'sipesat');
+    const unsubscribe = onValue(sipesatRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        // 1. Sync counters to binCapacities
+        if (data.counter) {
+          setBinCapacities((prevBins) =>
+            prevBins.map((bin) => {
+              if (bin.id === 'battery' && data.counter.baterai !== undefined) {
+                const count = data.counter.baterai;
+                return {
+                  ...bin,
+                  currentCount: count,
+                  percentage: Math.min(100, Math.round((count / bin.maxVolume) * 100)),
+                };
+              }
+              if (bin.id === 'atk' && data.counter.atk !== undefined) {
+                const count = data.counter.atk;
+                return {
+                  ...bin,
+                  currentCount: count,
+                  percentage: Math.min(100, Math.round((count / bin.maxVolume) * 100)),
+                };
+              }
+              if (bin.id === 'box' && data.counter.kemasan_kotak !== undefined) {
+                const count = data.counter.kemasan_kotak;
+                return {
+                  ...bin,
+                  currentCount: count,
+                  percentage: Math.min(100, Math.round((count / bin.maxVolume) * 100)),
+                };
+              }
+              return bin;
+            })
+          );
+        }
+
+        // 2. Trigger alert toast and add transaction if status_terakhir changes
+        if (data.status_terakhir && data.status_terakhir !== lastStatusLog.current) {
+          lastStatusLog.current = data.status_terakhir;
+          setAlertToast(`SIPESAT AI: ${data.status_terakhir}`);
+          
+          const logText = data.status_terakhir;
+          setTransactions((prevTx) => {
+            const now = new Date();
+            let type: 'battery' | 'atk' | 'box' | 'bottle' = 'battery';
+            let title = 'Deposit Baterai (1)';
+            
+            if (logText.toLowerCase().includes('atk')) {
+              type = 'atk';
+              title = 'Deposit ATK (1)';
+            } else if (logText.toLowerCase().includes('kemasan') || logText.toLowerCase().includes('kotak')) {
+              type = 'box';
+              title = 'Deposit Kemasan Kotak (1)';
+            }
+            
+            const newTx: TransactionItem = {
+              id: `tx-firebase-${Date.now()}`,
+              title: title,
+              count: 1,
+              date: now.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }),
+              time: now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
+              status: 'Selesai',
+              amount: 0,
+              type: type,
+            };
+            return [newTx, ...prevTx].slice(0, 10);
+          });
+
+          setTimeout(() => setAlertToast(null), 4000);
+        }
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   // Live transaction log
   const [transactions, setTransactions] = useState<TransactionItem[]>([
