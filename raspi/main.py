@@ -9,6 +9,8 @@ import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import db
 import datetime
+from http.server import HTTPServer, BaseHTTPRequestHandler
+import threading
 
 print("=== INISIALISASI SMART WASTE SYSTEM (AI VISION & IOT FIREBASE) ===")
 
@@ -62,6 +64,10 @@ status_mesin = "STANDBY - MENCARI SAMPAH..."
 last_detected = "KOSONG"
 confidence_txt = "0%"
 
+# Variabel Global untuk Streaming Kamera ke Web (In-Memory MJPEG)
+latest_frame = None
+frame_lock = threading.Lock()
+
 # ==========================================
 # 4. FUNGSI KONTROL MEKANIK & FIREBASE
 # ==========================================
@@ -105,6 +111,52 @@ def update_firebase(jenis_sampah, t_baterai, t_atk, t_kemasan):
         print(f"[FIREBASE] >> Sinkronisasi data {jenis_sampah} ke Cloud sukses!")
     except Exception as e:
         print(f"[FIREBASE ERROR] Gagal mengirim data: {e}")
+
+# HTTP Stream Server Handler untuk MJPEG Video Stream
+class StreamHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        global latest_frame
+        if self.path == '/stream.mjpg':
+            self.send_response(200)
+            self.send_header('Age', 0)
+            self.send_header('Cache-Control', 'no-cache, private')
+            self.send_header('Pragma', 'no-cache')
+            self.send_header('Content-Type', 'multipart/x-mixed-replace; boundary=frame')
+            self.end_headers()
+            try:
+                while True:
+                    with frame_lock:
+                        frame = latest_frame
+                    
+                    if frame is not None:
+                        self.wfile.write(b'--frame\r\n')
+                        self.send_header('Content-Type', 'image/jpeg')
+                        self.send_header('Content-Length', len(frame))
+                        self.end_headers()
+                        self.wfile.write(frame)
+                        self.wfile.write(b'\r\n')
+                    time.sleep(0.08) # Mengirimkan frame dengan jeda kecil (~12 FPS)
+            except Exception as e:
+                pass
+        else:
+            self.send_response(404)
+            self.end_headers()
+
+    def log_message(self, format, *args):
+        # Mute logging default server agar tidak mengotori terminal Raspi
+        return
+
+def start_stream_server():
+    try:
+        server = HTTPServer(('0.0.0.0', 8080), StreamHandler)
+        print("[INFO] Server Stream Kamera aktif di http://<IP_RASPBERRY_PI>:8080/stream.mjpg")
+        server.serve_forever()
+    except Exception as e:
+        print(f"[ERROR] Gagal menjalankan server stream: {e}")
+
+# Jalankan server HTTP untuk streaming kamera pada thread terpisah (Background)
+stream_thread = threading.Thread(target=start_stream_server, daemon=True)
+stream_thread.start()
 
 # ==========================================
 # 5. SETUP MODEL AI (TENSORFLOW LITE)
@@ -183,6 +235,14 @@ def process_and_display():
 
     cv2.imshow("SMART WASTE VISUAL MONITOR", img_display)
     cv2.waitKey(1)
+    
+    # Encode frame ke JPEG secara in-memory untuk streaming ke web
+    try:
+        _, encoded_img = cv2.imencode('.jpg', img_display)
+        with frame_lock:
+            latest_frame = encoded_img.tobytes()
+    except Exception as e:
+        pass
     
     return nama_kelas, confidence
 
