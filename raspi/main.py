@@ -10,6 +10,7 @@ from firebase_admin import credentials
 from firebase_admin import db
 import datetime
 from http.server import HTTPServer, BaseHTTPRequestHandler
+from socketserver import ThreadingMixIn
 import threading
 
 print("=== INISIALISASI SMART WASTE SYSTEM (AI VISION & IOT FIREBASE) ===")
@@ -146,9 +147,13 @@ class StreamHandler(BaseHTTPRequestHandler):
         # Mute logging default server agar tidak mengotori terminal Raspi
         return
 
+class ThreadingHTTPServer(ThreadingMixIn, HTTPServer):
+    """Server HTTP dengan dukungan Multi-Threading untuk melayani banyak klien sekaligus"""
+    pass
+
 def start_stream_server():
     try:
-        server = HTTPServer(('0.0.0.0', 8080), StreamHandler)
+        server = ThreadingHTTPServer(('0.0.0.0', 8080), StreamHandler)
         print("[INFO] Server Stream Kamera aktif di http://<IP_RASPBERRY_PI>:8080/stream.mjpg")
         server.serve_forever()
     except Exception as e:
