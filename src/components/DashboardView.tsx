@@ -244,9 +244,10 @@ export default function DashboardView({
             ) : (
               <div className="absolute inset-0 w-full h-full bg-black flex items-center justify-center overflow-hidden">
                 <img 
+                  key={ipUrl}
                   src={ipUrl} 
                   alt="Raspberry Pi Camera Stream" 
-                  className="w-full h-full object-cover" 
+                  className="w-full h-full object-cover relative z-10" 
                   onError={(e) => {
                     e.currentTarget.style.display = 'none';
                     const parent = e.currentTarget.parentElement;
@@ -255,13 +256,22 @@ export default function DashboardView({
                       if (fallback) fallback.classList.remove('hidden');
                     }
                   }}
+                  onLoad={(e) => {
+                    e.currentTarget.style.display = 'block';
+                    const parent = e.currentTarget.parentElement;
+                    if (parent) {
+                      const fallback = parent.querySelector('.stream-fallback');
+                      if (fallback) fallback.classList.add('hidden');
+                    }
+                  }}
                 />
                 
-                <div className="stream-fallback hidden absolute inset-0 flex flex-col items-center justify-center p-4 text-center bg-black/90">
+                <div className="stream-fallback hidden absolute inset-0 flex flex-col items-center justify-center p-4 text-center bg-black/90 z-0">
                   <Wifi className="w-7 h-7 text-error/70 mb-2" />
-                  <p className="text-[11px] text-white font-bold leading-tight uppercase tracking-wider">Stream Connection Failed</p>
-                  <p className="text-[9px] text-on-surface-variant opacity-60 mt-1 max-w-[200px]">
-                    Pastikan Raspberry Pi online dan menyajikan mjpg-streamer di:
+                  <p className="text-[11px] text-white font-bold leading-tight uppercase tracking-wider">KONEKSI STREAM TERPUTUS</p>
+                  <p className="text-[9px] text-on-surface-variant opacity-70 mt-1 max-w-[240px]">
+                    Jika menggunakan Ngrok, stream mungkin diblokir oleh halaman peringatan keamanan Ngrok.
+                    Kami sangat merekomendasikan menggunakan <b>localhost.run</b>.
                   </p>
                   <code className="text-[9px] bg-white/5 border border-white/10 px-1.5 py-0.5 rounded mt-2 text-primary max-w-full truncate font-mono select-all">
                     {ipUrl}
