@@ -495,10 +495,6 @@ export default function DashboardView({
                 <span className="text-xs text-on-surface-variant">Waktu</span>
                 <span className="text-xs text-white font-mono">{selectedTx.date} @ {selectedTx.time}</span>
               </div>
-              <div className="flex justify-between border-b border-white/5 pb-2">
-                <span className="text-xs text-on-surface-variant">Nilai Insentif</span>
-                <span className="text-xs text-primary-fixed-dim font-bold">Rp {selectedTx.amount.toLocaleString('id-ID')}</span>
-              </div>
               <div className="flex justify-between pb-2">
                 <span className="text-xs text-on-surface-variant">Status Jaringan</span>
                 <span className="text-[10px] bg-primary/20 text-primary-fixed-dim px-2 py-0.5 rounded font-bold uppercase">
