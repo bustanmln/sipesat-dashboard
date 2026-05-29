@@ -180,7 +180,7 @@ is_floating_model = input_details[0]['dtype'] == np.float32
 # 6. FUNGSI PEMROSESAN GAMBAR & GUI
 # ==========================================
 def process_and_display():
-    global status_mesin, last_detected, confidence_txt
+    global status_mesin, last_detected, confidence_txt, latest_frame
     
     # 1. Ambil snapshot menggunakan rpicam-still (Anti-Lag)
     subprocess.run(["rpicam-still", "-n", "-t", "50", "-o", IMAGE_TEMP, "--width", "640", "--height", "480"], capture_output=True)
