@@ -414,9 +414,6 @@ export default function DashboardView({
 
                   <div className="flex items-center justify-between md:justify-end gap-6 border-t md:border-none border-white/5 pt-3 md:pt-0">
                     <div className="text-left md:text-right">
-                      <p className="text-primary-fixed-dim font-bold text-base font-headline">
-                        +Rp {tx.amount.toLocaleString('id-ID')}
-                      </p>
                       <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-primary/10 text-primary border border-primary/20 mt-1">
                         {tx.status}
                       </span>
