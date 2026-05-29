@@ -130,9 +130,8 @@ class StreamHandler(BaseHTTPRequestHandler):
                     
                     if frame is not None:
                         self.wfile.write(b'--frame\r\n')
-                        self.send_header('Content-Type', 'image/jpeg')
-                        self.send_header('Content-Length', len(frame))
-                        self.end_headers()
+                        self.wfile.write(b'Content-Type: image/jpeg\r\n')
+                        self.wfile.write(f'Content-Length: {len(frame)}\r\n\r\n'.encode())
                         self.wfile.write(frame)
                         self.wfile.write(b'\r\n')
                     time.sleep(0.08) # Mengirimkan frame dengan jeda kecil (~12 FPS)
