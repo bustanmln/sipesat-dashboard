@@ -28,7 +28,7 @@ export default function DashboardView({
 
   // Camera Integration states
   const [cameraMode, setCameraMode] = useState<'simulation' | 'ip'>(() => {
-    return (localStorage.getItem('sipesat_camera_mode') as 'simulation' | 'ip') || 'simulation';
+    return (localStorage.getItem('sipesat_camera_mode') as 'simulation' | 'ip') || 'ip';
   });
   const [ipUrl, setIpUrl] = useState(() => {
     return localStorage.getItem('sipesat_ip_url') || 'http://192.168.1.100:8080/stream.mjpg';
