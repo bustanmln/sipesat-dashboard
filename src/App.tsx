@@ -259,7 +259,6 @@ export default function App() {
               <LoginView onLoginSuccess={handleLoginSuccess} />
             ) : currentView === 'dashboard' ? (
               <DashboardView 
-                balance={balance} 
                 transactions={transactions} 
                 binCapacities={binCapacities}
                 onTriggerWasteSim={simulateFullInput}

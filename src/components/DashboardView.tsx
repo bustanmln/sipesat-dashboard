@@ -5,14 +5,13 @@
 
 import React, { useState } from 'react';
 import { 
-  QrCode, BatteryCharging, PenTool, Container, Droplets, 
+  BatteryCharging, PenTool, Container, Droplets, 
   ChevronRight, ArrowUpRight, CheckCircle2, RefreshCw, X,
   Camera, Video, Wifi, Settings, Sparkles
 } from 'lucide-react';
 import { TransactionItem, BinCapacity } from '../types';
 
 interface DashboardViewProps {
-  balance: number;
   transactions: TransactionItem[];
   binCapacities: BinCapacity[];
   onTriggerWasteSim: () => void;
@@ -20,13 +19,11 @@ interface DashboardViewProps {
 }
 
 export default function DashboardView({
-  balance,
   transactions,
   binCapacities,
   onTriggerWasteSim,
   onRefreshData,
 }: DashboardViewProps) {
-  const [showQrModal, setShowQrModal] = useState(false);
   const [selectedTx, setSelectedTx] = useState<TransactionItem | null>(null);
 
   // Camera Integration states
@@ -151,30 +148,194 @@ export default function DashboardView({
       {/* Bento Grid Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
-        {/* Balance Card (Large 7-cols) */}
-        <div className="lg:col-span-7 glass-panel bg-white/3 card-gradient rounded-xl p-8 relative overflow-hidden group border border-white/10 min-h-[220px] flex flex-col justify-between">
-          <div className="absolute top-0 right-0 w-80 h-80 bg-primary-fixed-dim/5 rounded-full blur-[90px] pointer-events-none group-hover:bg-primary-fixed-dim/10 transition-all duration-700"></div>
+        {/* Raspberry Pi 4B Camera Feed Card (Large 7-cols) */}
+        <div className="lg:col-span-7 glass-panel bg-white/3 rounded-xl p-5 border border-white/10 flex flex-col justify-between group overflow-hidden relative min-h-[350px]">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-primary-fixed-dim/5 rounded-full blur-2xl pointer-events-none"></div>
           
-          <div className="relative z-10">
-            <p className="text-xs font-semibold tracking-wider text-on-surface-variant uppercase font-headline">
-              Saldo Terkumpul
-            </p>
-            <h2 className="font-headline text-[48px] font-black text-white mt-1.5 tracking-tight">
-              Rp {balance.toLocaleString('id-ID')}
-            </h2>
-            <p className="text-xs text-on-surface-variant opacity-60 mt-1">
-              Dapat dicairkan melalui e-wallet mitra Lingkungan terdekat.
-            </p>
+          <div className="flex justify-between items-center mb-3">
+            <div className="flex items-center gap-2">
+              <Camera className="w-4 h-4 text-primary-fixed-dim" />
+              <span className="text-xs font-bold tracking-wider text-white uppercase font-headline">
+                Pi Camera Feed
+              </span>
+            </div>
+            
+            <div className="flex items-center gap-1.5 bg-black/40 px-2 py-0.5 rounded border border-white/5">
+              <span className={`w-2 h-2 rounded-full ${
+                detectionState.status === 'scanning' 
+                  ? 'bg-[#facc15] animate-pulse' 
+                  : detectionState.status === 'detected' 
+                    ? 'bg-primary-fixed-dim pulse-dot' 
+                    : 'bg-red-500 animate-pulse'
+              }`}></span>
+              <span className="text-[10px] font-mono font-bold text-white uppercase">
+                {detectionState.status === 'scanning' ? 'SCAN' : detectionState.status === 'detected' ? 'LOCK' : 'LIVE'}
+              </span>
+            </div>
           </div>
 
-          <div className="relative z-10 mt-6">
-            <button
-              onClick={() => setShowQrModal(true)}
-              className="bg-primary hover:shadow-[0_0_20px_rgba(74,222,128,0.5)] text-on-primary font-headline text-xs font-bold py-3.5 px-6 rounded-lg uppercase tracking-wider flex items-center justify-center gap-2.5 transition-all outline-none cursor-pointer"
-            >
-              <QrCode className="w-4.5 h-4.5" />
-              Tampilkan QR Code
-            </button>
+          {/* Camera Viewport */}
+          <div className="relative aspect-video w-full rounded-lg bg-[#0a0d14] border border-white/10 overflow-hidden flex items-center justify-center font-mono">
+            {cameraMode === 'simulation' ? (
+              <div className="absolute inset-0 w-full h-full flex flex-col justify-center items-center overflow-hidden">
+                {detectionState.status === 'scanning' && (
+                  <div className="absolute left-0 w-full h-[2px] bg-primary-fixed-dim/80 shadow-[0_0_8px_#4ade80] animate-scan z-20"></div>
+                )}
+                
+                <div className="w-full h-full relative">
+                  <div className="absolute inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:16px_16px] opacity-40"></div>
+                  
+                  <div className="absolute top-3 left-3 w-4 h-4 border-t-2 border-l-2 border-white/20"></div>
+                  <div className="absolute top-3 right-3 w-4 h-4 border-t-2 border-r-2 border-white/20"></div>
+                  <div className="absolute bottom-3 left-3 w-4 h-4 border-b-2 border-l-2 border-white/20"></div>
+                  <div className="absolute bottom-3 right-3 w-4 h-4 border-b-2 border-r-2 border-white/20"></div>
+                  
+                  <div className="absolute top-2 left-3 text-[9px] text-white/40 flex flex-col gap-0.5 select-none">
+                    <span>CAM-01 [RASPBERRY_PI_4B]</span>
+                    <span>192.168.1.92</span>
+                  </div>
+                  
+                  <div className="absolute top-2 right-3 text-[9px] text-white/40 text-right flex flex-col gap-0.5 select-none">
+                    <span>AI-NET: V1.0-STABLE</span>
+                    <span>FPS: {detectionState.status === 'scanning' ? '54.2' : '60.0'}</span>
+                  </div>
+
+                  {detectionState.status === 'detected' && detectionState.type && (
+                    <div className="absolute top-[25%] left-[25%] w-[50%] h-[50%] border-2 border-primary shadow-[0_0_15px_rgba(74,222,128,0.4)] rounded flex flex-col justify-between p-1.5 animate-pulse z-10 bg-primary/5">
+                      <div className="flex justify-between items-start">
+                        <span className="text-[9px] font-bold text-white bg-primary px-1.5 py-0.5 rounded leading-none uppercase tracking-wider">
+                          {detectionState.item}
+                        </span>
+                        <span className="text-[8px] font-mono text-primary bg-black/60 px-1 py-0.5 rounded leading-none">
+                          {(detectionState.confidence || 0).toFixed(1)}%
+                        </span>
+                      </div>
+                      <div className="text-[8px] text-primary-fixed-dim text-right font-bold uppercase tracking-widest font-mono">
+                        TARGET LOCKED
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="absolute inset-0 flex flex-col items-center justify-center z-10">
+                    {detectionState.status === 'scanning' && (
+                      <div className="flex flex-col items-center gap-1.5">
+                        <RefreshCw className="w-6 h-6 text-primary-fixed-dim animate-spin" />
+                        <span className="text-[10px] font-bold tracking-widest text-primary-fixed-dim uppercase bg-primary/10 px-2 py-0.5 rounded border border-primary/20">
+                          Analysing Chute...
+                        </span>
+                      </div>
+                    )}
+                    {detectionState.status === 'idle' && (
+                      <div className="flex flex-col items-center gap-1 text-center">
+                        <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/30 border border-white/5">
+                          <Video className="w-5 h-5 text-white/30" />
+                        </div>
+                        <span className="text-[10px] font-bold text-white/40 tracking-wider uppercase mt-1">
+                          No Object Spotted
+                        </span>
+                        <span className="text-[9px] text-white/20 select-none">
+                          Click Simulate to start sorting
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="absolute inset-0 w-full h-full bg-black flex items-center justify-center overflow-hidden">
+                <img 
+                  src={ipUrl} 
+                  alt="Raspberry Pi Camera Stream" 
+                  className="w-full h-full object-cover" 
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                    const parent = e.currentTarget.parentElement;
+                    if (parent) {
+                      const fallback = parent.querySelector('.stream-fallback');
+                      if (fallback) fallback.classList.remove('hidden');
+                    }
+                  }}
+                />
+                
+                <div className="stream-fallback hidden absolute inset-0 flex flex-col items-center justify-center p-4 text-center bg-black/90">
+                  <Wifi className="w-7 h-7 text-error/70 mb-2" />
+                  <p className="text-[11px] text-white font-bold leading-tight uppercase tracking-wider">Stream Connection Failed</p>
+                  <p className="text-[9px] text-on-surface-variant opacity-60 mt-1 max-w-[200px]">
+                    Pastikan Raspberry Pi online dan menyajikan mjpg-streamer di:
+                  </p>
+                  <code className="text-[9px] bg-white/5 border border-white/10 px-1.5 py-0.5 rounded mt-2 text-primary max-w-full truncate font-mono select-all">
+                    {ipUrl}
+                  </code>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Mode Switch and Settings bar */}
+          <div className="mt-3 pt-3 border-t border-white/5">
+            {isEditingIp ? (
+              <div className="space-y-2">
+                <label className="block text-[10px] text-on-surface-variant font-bold uppercase tracking-wider">
+                  Raspberry Pi Stream URL
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    defaultValue={ipUrl}
+                    id="camera_ip_input"
+                    className="flex-1 bg-surface-container border border-white/10 rounded-lg py-1 px-2.5 text-xs text-white font-mono"
+                    placeholder="http://192.168.1.100:8080/stream.mjpg"
+                  />
+                  <button
+                    onClick={() => {
+                      const input = document.getElementById('camera_ip_input') as HTMLInputElement;
+                      if (input) handleIpUrlSave(input.value);
+                    }}
+                    className="px-2.5 bg-primary text-on-primary font-headline text-xs font-bold rounded-lg"
+                  >
+                    Save
+                  </button>
+                  <button
+                    onClick={() => setIsEditingIp(false)}
+                    className="px-2.5 bg-white/5 text-white/60 border border-white/10 text-xs rounded-lg"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex justify-between items-center text-xs">
+                <div className="flex rounded-lg bg-surface-container-low p-1 border border-white/5">
+                  <button
+                    onClick={() => handleCameraModeChange('simulation')}
+                    className={`px-2.5 py-1 text-[10px] font-bold rounded-md font-headline transition-all ${cameraMode === 'simulation' ? 'bg-primary/10 text-primary border border-primary/20' : 'text-on-surface-variant'}`}
+                  >
+                    AI Sim
+                  </button>
+                  <button
+                    onClick={() => handleCameraModeChange('ip')}
+                    className={`px-2.5 py-1 text-[10px] font-bold rounded-md font-headline transition-all ${cameraMode === 'ip' ? 'bg-primary/10 text-primary border border-primary/20' : 'text-on-surface-variant'}`}
+                  >
+                    IP Cam
+                  </button>
+                </div>
+
+                {cameraMode === 'ip' ? (
+                  <button
+                    onClick={() => setIsEditingIp(true)}
+                    className="p-1 px-2 text-[10px] font-semibold text-secondary-fixed-dim hover:text-white bg-[#00dbe9]/10 rounded border border-[#00dbe9]/20 flex items-center gap-1 transition-all"
+                  >
+                    <Settings className="w-3 h-3" />
+                    Configure IP
+                  </button>
+                ) : (
+                  <div className="text-[10px] font-bold text-primary-fixed-dim/75 font-mono select-none flex items-center gap-1">
+                    <Sparkles className="w-3.5 h-3.5" />
+                    Object Detection Active
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
 
@@ -271,196 +432,6 @@ export default function DashboardView({
         {/* Right Sidebar Column (4-cols) */}
         <div className="lg:col-span-4 flex flex-col gap-6">
           
-          {/* Raspberry Pi 4B Camera Feed Card */}
-          <div className="glass-panel bg-white/3 rounded-xl p-5 border border-white/10 flex flex-col justify-between group overflow-hidden relative min-h-[350px]">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-primary-fixed-dim/5 rounded-full blur-2xl pointer-events-none"></div>
-            
-            <div className="flex justify-between items-center mb-3">
-              <div className="flex items-center gap-2">
-                <Camera className="w-4 h-4 text-primary-fixed-dim" />
-                <span className="text-xs font-bold tracking-wider text-white uppercase font-headline">
-                  Pi Camera Feed
-                </span>
-              </div>
-              
-              <div className="flex items-center gap-1.5 bg-black/40 px-2 py-0.5 rounded border border-white/5">
-                <span className={`w-2 h-2 rounded-full ${
-                  detectionState.status === 'scanning' 
-                    ? 'bg-[#facc15] animate-pulse' 
-                    : detectionState.status === 'detected' 
-                      ? 'bg-primary-fixed-dim pulse-dot' 
-                      : 'bg-red-500 animate-pulse'
-                }`}></span>
-                <span className="text-[10px] font-mono font-bold text-white uppercase">
-                  {detectionState.status === 'scanning' ? 'SCAN' : detectionState.status === 'detected' ? 'LOCK' : 'LIVE'}
-                </span>
-              </div>
-            </div>
-
-            {/* Camera Viewport */}
-            <div className="relative aspect-video w-full rounded-lg bg-[#0a0d14] border border-white/10 overflow-hidden flex items-center justify-center font-mono">
-              {cameraMode === 'simulation' ? (
-                <div className="absolute inset-0 w-full h-full flex flex-col justify-center items-center overflow-hidden">
-                  {detectionState.status === 'scanning' && (
-                    <div className="absolute left-0 w-full h-[2px] bg-primary-fixed-dim/80 shadow-[0_0_8px_#4ade80] animate-scan z-20"></div>
-                  )}
-                  
-                  <div className="w-full h-full relative">
-                    <div className="absolute inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:16px_16px] opacity-40"></div>
-                    
-                    <div className="absolute top-3 left-3 w-4 h-4 border-t-2 border-l-2 border-white/20"></div>
-                    <div className="absolute top-3 right-3 w-4 h-4 border-t-2 border-r-2 border-white/20"></div>
-                    <div className="absolute bottom-3 left-3 w-4 h-4 border-b-2 border-l-2 border-white/20"></div>
-                    <div className="absolute bottom-3 right-3 w-4 h-4 border-b-2 border-r-2 border-white/20"></div>
-                    
-                    <div className="absolute top-2 left-3 text-[9px] text-white/40 flex flex-col gap-0.5 select-none">
-                      <span>CAM-01 [RASPBERRY_PI_4B]</span>
-                      <span>192.168.1.92</span>
-                    </div>
-                    
-                    <div className="absolute top-2 right-3 text-[9px] text-white/40 text-right flex flex-col gap-0.5 select-none">
-                      <span>AI-NET: V1.0-STABLE</span>
-                      <span>FPS: {detectionState.status === 'scanning' ? '54.2' : '60.0'}</span>
-                    </div>
-
-                    {detectionState.status === 'detected' && detectionState.type && (
-                      <div className="absolute top-[25%] left-[25%] w-[50%] h-[50%] border-2 border-primary shadow-[0_0_15px_rgba(74,222,128,0.4)] rounded flex flex-col justify-between p-1.5 animate-pulse z-10 bg-primary/5">
-                        <div className="flex justify-between items-start">
-                          <span className="text-[9px] font-bold text-white bg-primary px-1.5 py-0.5 rounded leading-none uppercase tracking-wider">
-                            {detectionState.item}
-                          </span>
-                          <span className="text-[8px] font-mono text-primary bg-black/60 px-1 py-0.5 rounded leading-none">
-                            {(detectionState.confidence || 0).toFixed(1)}%
-                          </span>
-                        </div>
-                        <div className="text-[8px] text-primary-fixed-dim text-right font-bold uppercase tracking-widest font-mono">
-                          TARGET LOCKED
-                        </div>
-                      </div>
-                    )}
-
-                    <div className="absolute inset-0 flex flex-col items-center justify-center z-10">
-                      {detectionState.status === 'scanning' && (
-                        <div className="flex flex-col items-center gap-1.5">
-                          <RefreshCw className="w-6 h-6 text-primary-fixed-dim animate-spin" />
-                          <span className="text-[10px] font-bold tracking-widest text-primary-fixed-dim uppercase bg-primary/10 px-2 py-0.5 rounded border border-primary/20">
-                            Analysing Chute...
-                          </span>
-                        </div>
-                      )}
-                      {detectionState.status === 'idle' && (
-                        <div className="flex flex-col items-center gap-1 text-center">
-                          <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/30 border border-white/5">
-                            <Video className="w-5 h-5 text-white/30" />
-                          </div>
-                          <span className="text-[10px] font-bold text-white/40 tracking-wider uppercase mt-1">
-                            No Object Spotted
-                          </span>
-                          <span className="text-[9px] text-white/20 select-none">
-                            Click Simulate to start sorting
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="absolute inset-0 w-full h-full bg-black flex items-center justify-center overflow-hidden">
-                  <img 
-                    src={ipUrl} 
-                    alt="Raspberry Pi Camera Stream" 
-                    className="w-full h-full object-cover" 
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                      const parent = e.currentTarget.parentElement;
-                      if (parent) {
-                        const fallback = parent.querySelector('.stream-fallback');
-                        if (fallback) fallback.classList.remove('hidden');
-                      }
-                    }}
-                  />
-                  
-                  <div className="stream-fallback hidden absolute inset-0 flex flex-col items-center justify-center p-4 text-center bg-black/90">
-                    <Wifi className="w-7 h-7 text-error/70 mb-2" />
-                    <p className="text-[11px] text-white font-bold leading-tight uppercase tracking-wider">Stream Connection Failed</p>
-                    <p className="text-[9px] text-on-surface-variant opacity-60 mt-1 max-w-[200px]">
-                      Pastikan Raspberry Pi online dan menyajikan mjpg-streamer di:
-                    </p>
-                    <code className="text-[9px] bg-white/5 border border-white/10 px-1.5 py-0.5 rounded mt-2 text-primary max-w-full truncate font-mono select-all">
-                      {ipUrl}
-                    </code>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Mode Switch and Settings bar */}
-            <div className="mt-3 pt-3 border-t border-white/5">
-              {isEditingIp ? (
-                <div className="space-y-2">
-                  <label className="block text-[10px] text-on-surface-variant font-bold uppercase tracking-wider">
-                    Raspberry Pi Stream URL
-                  </label>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      defaultValue={ipUrl}
-                      id="camera_ip_input"
-                      className="flex-1 bg-surface-container border border-white/10 rounded-lg py-1 px-2.5 text-xs text-white font-mono"
-                      placeholder="http://192.168.1.100:8080/stream.mjpg"
-                    />
-                    <button
-                      onClick={() => {
-                        const input = document.getElementById('camera_ip_input') as HTMLInputElement;
-                        if (input) handleIpUrlSave(input.value);
-                      }}
-                      className="px-2.5 bg-primary text-on-primary font-headline text-xs font-bold rounded-lg"
-                    >
-                      Save
-                    </button>
-                    <button
-                      onClick={() => setIsEditingIp(false)}
-                      className="px-2.5 bg-white/5 text-white/60 border border-white/10 text-xs rounded-lg"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div className="flex justify-between items-center text-xs">
-                  <div className="flex rounded-lg bg-surface-container-low p-1 border border-white/5">
-                    <button
-                      onClick={() => handleCameraModeChange('simulation')}
-                      className={`px-2.5 py-1 text-[10px] font-bold rounded-md font-headline transition-all ${cameraMode === 'simulation' ? 'bg-primary/10 text-primary border border-primary/20' : 'text-on-surface-variant'}`}
-                    >
-                      AI Sim
-                    </button>
-                    <button
-                      onClick={() => handleCameraModeChange('ip')}
-                      className={`px-2.5 py-1 text-[10px] font-bold rounded-md font-headline transition-all ${cameraMode === 'ip' ? 'bg-primary/10 text-primary border border-primary/20' : 'text-on-surface-variant'}`}
-                    >
-                      IP Cam
-                    </button>
-                  </div>
-
-                  {cameraMode === 'ip' ? (
-                    <button
-                      onClick={() => setIsEditingIp(true)}
-                      className="p-1 px-2 text-[10px] font-semibold text-secondary-fixed-dim hover:text-white bg-[#00dbe9]/10 rounded border border-[#00dbe9]/20 flex items-center gap-1 transition-all"
-                    >
-                      <Settings className="w-3 h-3" />
-                      Configure IP
-                    </button>
-                  ) : (
-                    <div className="text-[10px] font-bold text-primary-fixed-dim/75 font-mono select-none flex items-center gap-1">
-                      <Sparkles className="w-3.5 h-3.5" />
-                      Object Detection Active
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
 
           {/* System Health Card */}
           <div className="glass-panel bg-white/3 rounded-xl p-6 flex flex-col justify-between border border-white/10">
@@ -493,59 +464,7 @@ export default function DashboardView({
         </div>
       </div>
 
-      {/* Holographic QR Code Modal Overlay */}
-      {showQrModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-300">
-          <div className="glass-panel bg-[#141824]/90 border border-white/10 rounded-2xl p-8 max-w-sm w-full text-center relative overflow-hidden animate-in zoom-in-95 duration-300">
-            {/* Glowing background */}
-            <div className="absolute -top-12 -left-12 w-32 h-32 bg-primary/20 rounded-full blur-2xl"></div>
-            <div className="absolute -bottom-12 -right-12 w-32 h-32 bg-secondary-container/10 rounded-full blur-2xl"></div>
 
-            <button 
-              onClick={() => setShowQrModal(false)}
-              className="absolute top-4 right-4 text-on-surface-variant hover:text-white transition-colors"
-            >
-              <X className="w-5 h-5" />
-            </button>
-
-            <h3 className="font-headline text-lg font-extrabold text-white mb-1">
-              Ecosystem QR Verified
-            </h3>
-            <p className="text-xs text-on-surface-variant mb-6">
-              Arahkan layar ponsel Anda ke scanner IoT SIPESAT untuk autentikasi instan.
-            </p>
-
-            {/* Glowing QR wrapper */}
-            <div className="relative mx-auto w-48 h-48 bg-white/5 border border-primary/40 rounded-xl p-4 flex items-center justify-center neon-glow-primary overflow-hidden mb-6">
-              <div className="absolute inset-0 bg-gradient-to-b from-primary/10 via-transparent to-primary/10 animate-pulse pointer-events-none"></div>
-              {/* Complex futuristic pixel QR simulation */}
-              <div className="grid grid-cols-6 gap-1 w-full h-full opacity-90 p-2">
-                {[...Array(36)].map((_, i) => (
-                  <div 
-                    key={i} 
-                    className={`rounded-sm ${(i % 3 === 0 || i < 8 || i > 28 || i % 7 === 1) && i !== 14 ? 'bg-primary-fixed-dim shadow-[0_0_5px_rgba(42,229,0,0.5)]' : 'bg-transparent'}`}
-                  ></div>
-                ))}
-              </div>
-            </div>
-
-            <div className="bg-white/5 rounded-xl p-3.5 border border-white/5 mb-6 text-left">
-              <div className="flex justify-between text-xs mb-1">
-                <span className="text-on-surface-variant">ID User</span>
-                <span className="font-bold text-white font-mono">ALX-922658</span>
-              </div>
-              <div className="flex justify-between text-xs">
-                <span className="text-on-surface-variant">Uptime Token</span>
-                <span className="text-primary-fixed-dim font-bold">180s Active</span>
-              </div>
-            </div>
-
-            <p className="text-[10px] text-on-surface-variant opacity-55 uppercase tracking-wider font-semibold">
-              securing with sipesat end-to-end encryption
-            </p>
-          </div>
-        </div>
-      )}
 
       {/* Transaction Details Modal */}
       {selectedTx && (
