@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { LayoutDashboard, BarChart3, Binary, LogIn, Sparkles, RefreshCw, AlertCircle } from 'lucide-react';
-import { ref, onValue } from 'firebase/database';
+import { ref, onValue, set } from 'firebase/database';
 import { db } from '../firebase';
 import Sidebar from './components/Sidebar';
 import TopBar from './components/TopBar';
@@ -38,6 +38,8 @@ export default function App() {
   // Integrated live balance
   const [balance, setBalance] = useState<number>(25000);
 
+  const [ipUrl, setIpUrl] = useState<string>('http://192.168.18.168:8080/stream.mjpg');
+
   const lastStatusLog = useRef<string>('');
 
   // Firebase Realtime Database Synchronization
@@ -46,6 +48,11 @@ export default function App() {
     const unsubscribe = onValue(sipesatRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
+        // 0. Sync camera URL from Firebase Realtime Database
+        if (data.camera_url) {
+          setIpUrl(data.camera_url);
+        }
+
         // 1. Sync counters to binCapacities
         if (data.counter) {
           setBinCapacities((prevBins) =>
@@ -257,6 +264,14 @@ export default function App() {
     setTimeout(() => setAlertToast(null), 3000);
   };
 
+  const handleUpdateIpUrl = (url: string) => {
+    setIpUrl(url);
+    const cameraUrlRef = ref(db, 'sipesat/camera_url');
+    set(cameraUrlRef, url).catch((err) => {
+      console.error("Failed to update camera URL in Firebase: ", err);
+    });
+  };
+
   const simulateFullInput = () => {
     // Select random category to drop
     const types: ('battery' | 'atk' | 'box' | 'bottle')[] = ['battery', 'atk', 'box', 'bottle'];
@@ -345,6 +360,8 @@ export default function App() {
                 transactions={transactions} 
                 binCapacities={binCapacities}
                 onTriggerWasteSim={simulateFullInput}
+                ipUrl={ipUrl}
+                onUpdateIpUrl={handleUpdateIpUrl}
               />
             ) : currentView === 'analytics' ? (
               <AnalyticsView />

@@ -16,6 +16,8 @@ interface DashboardViewProps {
   binCapacities: BinCapacity[];
   onTriggerWasteSim: () => void;
   onRefreshData?: () => void;
+  ipUrl: string;
+  onUpdateIpUrl: (url: string) => void;
 }
 
 export default function DashboardView({
@@ -23,15 +25,14 @@ export default function DashboardView({
   binCapacities,
   onTriggerWasteSim,
   onRefreshData,
+  ipUrl,
+  onUpdateIpUrl,
 }: DashboardViewProps) {
   const [selectedTx, setSelectedTx] = useState<TransactionItem | null>(null);
 
   // Camera Integration states
   const [cameraMode, setCameraMode] = useState<'simulation' | 'ip'>(() => {
     return (localStorage.getItem('sipesat_camera_mode') as 'simulation' | 'ip') || 'ip';
-  });
-  const [ipUrl, setIpUrl] = useState(() => {
-    return localStorage.getItem('sipesat_ip_url') || 'http://192.168.18.168:8080/stream.mjpg';
   });
   const [isEditingIp, setIsEditingIp] = useState(false);
   const [detectionState, setDetectionState] = useState<{
@@ -52,8 +53,7 @@ export default function DashboardView({
   };
 
   const handleIpUrlSave = (url: string) => {
-    setIpUrl(url);
-    localStorage.setItem('sipesat_ip_url', url);
+    onUpdateIpUrl(url);
     setIsEditingIp(false);
   };
 
