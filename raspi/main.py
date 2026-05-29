@@ -136,9 +136,10 @@ class StreamHandler(BaseHTTPRequestHandler):
                         self.wfile.write(f'Content-Length: {len(frame)}\r\n\r\n'.encode())
                         self.wfile.write(frame)
                         self.wfile.write(b'\r\n')
+                        self.wfile.flush() # Mengosongkan buffer agar frame langsung terkirim
                     time.sleep(0.08) # Mengirimkan frame dengan jeda kecil (~12 FPS)
             except Exception as e:
-                pass
+                print(f"[STREAM INFO] Koneksi klien terputus: {e}")
         else:
             self.send_response(404)
             self.end_headers()
