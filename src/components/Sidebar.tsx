@@ -36,14 +36,20 @@ export default function Sidebar({
     <aside className="fixed left-0 top-0 h-full w-[280px] hidden md:flex flex-col border-r border-white/10 bg-surface/60 backdrop-blur-xl z-50 py-8">
       {/* Brand Header */}
       <div className="px-8 mb-10">
-        <div className="flex items-center gap-3 mb-2">
+        <div className="flex items-center gap-2 mb-2">
           <img 
             alt="SIPESAT Logo" 
             className="w-8 h-8 object-contain drop-shadow-[0_0_8px_rgba(42,229,0,0.3)] animate-pulse" 
             src={logoUrl} 
             referrerPolicy="no-referrer"
           />
-          <h1 className="font-headline text-2xl font-black text-brand-italic text-primary tracking-tighter">
+          <img 
+            alt="FTE Logo" 
+            className="w-8 h-8 object-contain drop-shadow-[0_0_8px_rgba(255,255,255,0.15)]" 
+            src={`${(import.meta as any).env.BASE_URL}fte.png`} 
+            referrerPolicy="no-referrer"
+          />
+          <h1 className="font-headline text-2xl font-black text-brand-italic text-primary tracking-tighter ml-1">
             SIPESAT
           </h1>
         </div>

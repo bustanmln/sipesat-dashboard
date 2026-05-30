@@ -44,7 +44,13 @@ export default function TopBar({
           src={`${(import.meta as any).env.BASE_URL}logo-sipesat.png`}
           referrerPolicy="no-referrer"
         />
-        <h2 className="font-headline text-lg font-black text-brand-italic text-primary tracking-tighter">
+        <img 
+          alt="FTE Mobile Logo" 
+          className="w-7 h-7 object-contain" 
+          src={`${(import.meta as any).env.BASE_URL}fte.png`}
+          referrerPolicy="no-referrer"
+        />
+        <h2 className="font-headline text-lg font-black text-brand-italic text-primary tracking-tighter ml-1">
           SIPESAT
         </h2>
       </div>
