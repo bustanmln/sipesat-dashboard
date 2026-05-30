@@ -44,7 +44,7 @@ export default function WelcomeView({ onEnter }: WelcomeViewProps) {
             <div className="relative group flex items-center justify-center">
               <img 
                 alt="Fakultas Teknik Elektro Logo" 
-                className="h-20 md:h-24 w-auto object-contain drop-shadow-[0_0_20px_rgba(255,255,255,0.15)] relative z-10 transition-transform duration-300 group-hover:scale-105" 
+                className="h-28 md:h-36 w-auto object-contain drop-shadow-[0_0_20px_rgba(255,255,255,0.15)] relative z-10 transition-transform duration-300 group-hover:scale-105" 
                 src={`${(import.meta as any).env.BASE_URL}fte.png`}
                 referrerPolicy="no-referrer"
               />

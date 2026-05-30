@@ -40,13 +40,13 @@ export default function TopBar({
       <div className="flex items-center gap-2 md:hidden">
         <img 
           alt="SIPESAT Mobile Logo" 
-          className="w-7 h-7 object-contain" 
+          className="h-7 w-auto object-contain" 
           src={`${(import.meta as any).env.BASE_URL}logo-sipesat.png`}
           referrerPolicy="no-referrer"
         />
         <img 
           alt="FTE Mobile Logo" 
-          className="w-7 h-7 object-contain" 
+          className="h-10 w-auto object-contain" 
           src={`${(import.meta as any).env.BASE_URL}fte.png`}
           referrerPolicy="no-referrer"
         />

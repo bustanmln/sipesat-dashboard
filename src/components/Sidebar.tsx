@@ -39,13 +39,13 @@ export default function Sidebar({
         <div className="flex items-center gap-2 mb-2">
           <img 
             alt="SIPESAT Logo" 
-            className="w-8 h-8 object-contain drop-shadow-[0_0_8px_rgba(42,229,0,0.3)] animate-pulse" 
+            className="h-8 w-auto object-contain drop-shadow-[0_0_8px_rgba(42,229,0,0.3)] animate-pulse" 
             src={logoUrl} 
             referrerPolicy="no-referrer"
           />
           <img 
             alt="FTE Logo" 
-            className="w-8 h-8 object-contain drop-shadow-[0_0_8px_rgba(255,255,255,0.15)]" 
+            className="h-11 w-auto object-contain drop-shadow-[0_0_8px_rgba(255,255,255,0.15)]" 
             src={`${(import.meta as any).env.BASE_URL}fte.png`} 
             referrerPolicy="no-referrer"
           />
