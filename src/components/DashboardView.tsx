@@ -18,6 +18,7 @@ interface DashboardViewProps {
   onRefreshData?: () => void;
   ipUrl: string;
   onUpdateIpUrl: (url: string) => void;
+  balance?: number;
 }
 
 export default function DashboardView({
@@ -175,7 +176,7 @@ export default function DashboardView({
           </div>
 
           {/* Camera Viewport */}
-          <div className="relative aspect-video w-full rounded-lg bg-[#0a0d14] border border-white/10 overflow-hidden flex items-center justify-center font-mono">
+          <div className="relative aspect-[4/3] w-full rounded-lg bg-[#0a0d14] border border-white/10 overflow-hidden flex items-center justify-center font-mono">
             {cameraMode === 'simulation' ? (
               <div className="absolute inset-0 w-full h-full flex flex-col justify-center items-center overflow-hidden">
                 {detectionState.status === 'scanning' && (
@@ -245,9 +246,10 @@ export default function DashboardView({
               <div className="absolute inset-0 w-full h-full bg-black flex items-center justify-center overflow-hidden">
                 <img 
                   key={ipUrl}
+                  id="stream_img"
                   src={ipUrl} 
                   alt="Raspberry Pi Camera Stream" 
-                  className="w-full h-full object-cover relative z-10" 
+                  className="w-full h-full object-contain relative z-10" 
                   onError={(e) => {
                     e.currentTarget.style.display = 'none';
                     const parent = e.currentTarget.parentElement;
@@ -266,16 +268,32 @@ export default function DashboardView({
                   }}
                 />
                 
-                <div className="stream-fallback hidden absolute inset-0 flex flex-col items-center justify-center p-4 text-center bg-black/90 z-0">
+                <div className="stream-fallback hidden absolute inset-0 flex flex-col items-center justify-center p-4 text-center bg-black/90 z-20">
                   <Wifi className="w-7 h-7 text-error/70 mb-2" />
                   <p className="text-[11px] text-white font-bold leading-tight uppercase tracking-wider">KONEKSI STREAM TERPUTUS</p>
                   <p className="text-[9px] text-on-surface-variant opacity-70 mt-1 max-w-[240px]">
-                    Jika menggunakan Ngrok, stream mungkin diblokir oleh halaman peringatan keamanan Ngrok.
-                    Kami sangat merekomendasikan menggunakan <b>localhost.run</b>.
+                    Pastikan Raspberry Pi sedang menyala dan tunnel aktif.
+                    Stream URL akan otomatis terupdate via Firebase ketika tunnel aktif.
                   </p>
                   <code className="text-[9px] bg-white/5 border border-white/10 px-1.5 py-0.5 rounded mt-2 text-primary max-w-full truncate font-mono select-all">
                     {ipUrl}
                   </code>
+                  <button
+                    onClick={() => {
+                      const img = document.getElementById('stream_img') as HTMLImageElement;
+                      if (img) {
+                        const baseUrl = ipUrl.split('?')[0];
+                        img.src = `${baseUrl}?t=${Date.now()}`;
+                        img.style.display = 'block';
+                        const fallback = img.parentElement?.querySelector('.stream-fallback');
+                        if (fallback) fallback.classList.add('hidden');
+                      }
+                    }}
+                    className="mt-3 px-4 py-1.5 text-[10px] font-bold uppercase tracking-wider bg-primary/20 hover:bg-primary/30 text-primary border border-primary/30 rounded-lg transition-all flex items-center gap-1.5"
+                  >
+                    <RefreshCw className="w-3 h-3" />
+                    Coba Hubungkan Ulang
+                  </button>
                 </div>
               </div>
             )}

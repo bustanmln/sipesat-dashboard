@@ -12,7 +12,7 @@ interface SidebarProps {
   onChangeView: (view: AppView) => void;
   isAuthenticated: boolean;
   onLogout: () => void;
-  userRole: 'Eco Specialist' | 'Chief Officer';
+  userRole: string;
   userName: string;
 }
 
@@ -24,7 +24,7 @@ export default function Sidebar({
   userRole,
   userName,
 }: SidebarProps) {
-  const logoUrl = "https://lh3.googleusercontent.com/aida/ADBb0ujdX2Sa3mAmQfwA8A0zd3JtnZzoVy6b1ccCz8Bnjig7ctt-pLrRW87bpWHG8fqaFkKunO4EI2UoAfbgVuMJPhQ_4F6TNfvxmxey7p-zsNbqwfyox5wwaFgbzny-knhPEx1Ezc0G-awm_HcvxHN7yyFWS5LjsfwM9iHTNMl1g7AJAm6XEN4sXYGVM5Q5QM-eChQ8LAPY2asGM_y2hzJ4_27mXA3SXsuIL2s1SuFqNOC1xKfm2EeyLDXuJ3qD";
+  const logoUrl = "/logo-sipesat.png";
 
   const menuItems = [
     { id: 'dashboard' as AppView, label: 'Dashboard', icon: LayoutDashboard },

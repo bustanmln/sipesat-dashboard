@@ -6,7 +6,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { LayoutDashboard, BarChart3, Binary, LogIn, Sparkles, RefreshCw, AlertCircle } from 'lucide-react';
 import { ref, onValue, set } from 'firebase/database';
-import { db } from '../firebase';
+import { onAuthStateChanged, signOut, User } from 'firebase/auth';
+import { auth, db } from '../firebase';
 import Sidebar from './components/Sidebar';
 import TopBar from './components/TopBar';
 import LoginView from './components/LoginView';
@@ -16,38 +17,92 @@ import DevicesView from './components/DevicesView';
 import { AppView, TransactionItem, BinCapacity } from './types';
 
 export default function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(true);
-  const [currentView, setCurrentView] = useState<AppView>('dashboard');
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [currentView, setCurrentView] = useState<AppView>('login');
   
-  // Custom Persona / Session states
-  const [currentPersona, setCurrentPersona] = useState<'Alex' | 'Admin'>('Alex');
-  const [userName, setUserName] = useState('Alex Rivera');
+  const [userName, setUserName] = useState('');
   const [userRole, setUserRole] = useState<'Eco Specialist' | 'Chief Officer'>('Eco Specialist');
 
-  // Sync persona updates
-  useEffect(() => {
-    if (currentPersona === 'Alex') {
-      setUserName('Alex Rivera');
-      setUserRole('Eco Specialist');
-    } else {
-      setUserName('Admin One');
-      setUserRole('Chief Officer');
-    }
-  }, [currentPersona]);
-
   // Integrated live balance
-  const [balance, setBalance] = useState<number>(25000);
+  const [balance, setBalance] = useState<number>(0);
+  const [transactions, setTransactions] = useState<TransactionItem[]>([]);
 
   const [ipUrl, setIpUrl] = useState<string>('http://192.168.18.168:8080/stream.mjpg');
 
   const lastStatusLog = useRef<string>('');
+  
+  // Real-time Node Status
+  const [isNodeOnline, setIsNodeOnline] = useState(false);
+  const lastHeartbeatRef = useRef<number>(0);
 
-  // Firebase Realtime Database Synchronization
+  // Monitor heartbeat staleness continuously
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const secondsSinceLastHeartbeat = (Date.now() / 1000) - lastHeartbeatRef.current;
+      setIsNodeOnline(secondsSinceLastHeartbeat < 25);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Firebase Auth State Listener
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      setIsAuthenticated(!!currentUser);
+      if (currentUser) {
+        setCurrentView('dashboard');
+      } else {
+        setCurrentView('login');
+        // Reset state on logout
+        setUserName('');
+        setBalance(0);
+        setTransactions([]);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
+  // Sync Current User Data (Profile, Balance, Transactions)
+  useEffect(() => {
+    if (!user) return;
+    
+    const userRef = ref(db, `users/${user.uid}`);
+    const unsubscribeUser = onValue(userRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        setUserName(data.name || user.email || 'User');
+        setUserRole(data.role || 'Eco Specialist');
+        setBalance(data.balance || 0);
+        
+        if (data.transactions) {
+          // Convert object to array and sort by id (which contains timestamp) descending
+          const txArray: TransactionItem[] = Object.values(data.transactions);
+          txArray.sort((a, b) => b.id.localeCompare(a.id));
+          setTransactions(txArray.slice(0, 20));
+        } else {
+          setTransactions([]);
+        }
+      }
+    });
+
+    return () => unsubscribeUser();
+  }, [user]);
+
+
+  // Firebase Realtime Database Synchronization (Global Device Data)
   useEffect(() => {
     const sipesatRef = ref(db, 'sipesat');
     const unsubscribe = onValue(sipesatRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
+        // Sync heartbeat
+        if (data.last_heartbeat) {
+          lastHeartbeatRef.current = data.last_heartbeat;
+          const secondsSinceLastHeartbeat = (Date.now() / 1000) - data.last_heartbeat;
+          setIsNodeOnline(secondsSinceLastHeartbeat < 25);
+        }
+
         // 0. Sync camera URL from Firebase Realtime Database
         if (data.camera_url) {
           setIpUrl(data.camera_url);
@@ -86,38 +141,12 @@ export default function App() {
           );
         }
 
-        // 2. Trigger alert toast and add transaction if status_terakhir changes
+        // 2. Trigger alert toast if status_terakhir changes
+        // We only show a toast for physical machine events, we don't automatically assign points
+        // because we don't know who is at the machine. (Use simulation to claim points).
         if (data.status_terakhir && data.status_terakhir !== lastStatusLog.current) {
           lastStatusLog.current = data.status_terakhir;
           setAlertToast(`SIPESAT AI: ${data.status_terakhir}`);
-          
-          const logText = data.status_terakhir;
-          setTransactions((prevTx) => {
-            const now = new Date();
-            let type: 'battery' | 'atk' | 'box' | 'bottle' = 'battery';
-            let title = 'Deposit Baterai (1)';
-            
-            if (logText.toLowerCase().includes('atk')) {
-              type = 'atk';
-              title = 'Deposit ATK (1)';
-            } else if (logText.toLowerCase().includes('kemasan') || logText.toLowerCase().includes('kotak')) {
-              type = 'box';
-              title = 'Deposit Kemasan Kotak (1)';
-            }
-            
-            const newTx: TransactionItem = {
-              id: `tx-firebase-${Date.now()}`,
-              title: title,
-              count: 1,
-              date: now.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }),
-              time: now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
-              status: 'Selesai',
-              amount: 0,
-              type: type,
-            };
-            return [newTx, ...prevTx].slice(0, 10);
-          });
-
           setTimeout(() => setAlertToast(null), 4000);
         }
       }
@@ -125,40 +154,6 @@ export default function App() {
 
     return () => unsubscribe();
   }, []);
-
-  // Live transaction log
-  const [transactions, setTransactions] = useState<TransactionItem[]>([
-    {
-      id: 'tx-1',
-      title: 'Deposit Baterai (3)',
-      count: 3,
-      date: '12 Okt 2023',
-      time: '14:20',
-      status: 'Selesai',
-      amount: 1500,
-      type: 'battery'
-    },
-    {
-      id: 'tx-2',
-      title: 'Deposit Botol Kecil (5)',
-      count: 5,
-      date: '10 Okt 2023',
-      time: '09:15',
-      status: 'Selesai',
-      amount: 2500,
-      type: 'bottle'
-    },
-    {
-      id: 'tx-3',
-      title: 'Deposit Kemasan Kotak (2)',
-      count: 2,
-      date: '08 Okt 2023',
-      time: '18:45',
-      status: 'Selesai',
-      amount: 1000,
-      type: 'box'
-    },
-  ]);
 
   // Live physical bin tracker status
   const [binCapacities, setBinCapacities] = useState<BinCapacity[]>([
@@ -212,9 +207,9 @@ export default function App() {
   // Triggered notifications tray alert
   const [alertToast, setAlertToast] = useState<string | null>(null);
 
-  // Live simulation event! (Insanely cool UX factor for client capstone evaluation)
+  // Live simulation event! Stores points to current logged-in user.
   const handleDepositSimulation = (binId: 'battery' | 'atk' | 'box' | 'bottle') => {
-    // 1. Calculate updates
+    // 1. Calculate updates for global bins (simulated)
     const updatedBins = binCapacities.map((item) => {
       if (item.id === binId) {
         const nextCount = item.currentCount + 1;
@@ -232,32 +227,36 @@ export default function App() {
 
     // 2. Add verification points
     const rewardRupiah = binId === 'battery' ? 500 : binId === 'bottle' ? 500 : binId === 'atk' ? 400 : 350;
-    setBalance((prev) => prev + rewardRupiah);
+    
+    if (user) {
+      const newBalance = balance + rewardRupiah;
+      set(ref(db, `users/${user.uid}/balance`), newBalance);
+
+      const now = new Date();
+      const mapLabel = {
+        battery: 'Deposit Baterai (1)',
+        atk: 'Deposit ATK (1)',
+        box: 'Deposit Kemasan Kotak (1)',
+        bottle: 'Deposit Botol Kecil (1)',
+      };
+
+      const txId = `tx-${Date.now()}`;
+      const newTx: TransactionItem = {
+        id: txId,
+        title: mapLabel[binId],
+        count: 1,
+        date: now.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }),
+        time: now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
+        status: 'Selesai',
+        amount: rewardRupiah,
+        type: binId,
+      };
+
+      set(ref(db, `users/${user.uid}/transactions/${txId}`), newTx);
+    }
 
     // 3. Increment counters
     setSortedToday((prev) => prev + 1);
-
-    // 4. Dispatch transaction log entry
-    const now = new Date();
-    const mapLabel = {
-      battery: 'Deposit Baterai (1)',
-      atk: 'Deposit ATK (1)',
-      box: 'Deposit Kemasan Kotak (1)',
-      bottle: 'Deposit Botol Kecil (1)',
-    };
-
-    const newTx: TransactionItem = {
-      id: `tx-${Date.now()}`,
-      title: mapLabel[binId],
-      count: 1,
-      date: now.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }),
-      time: now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
-      status: 'Selesai',
-      amount: rewardRupiah,
-      type: binId,
-    };
-
-    setTransactions([newTx, ...transactions]);
 
     // 5. Toast alert success feedback
     setAlertToast(`Identified ${binId.toUpperCase()}! Insentif +Rp ${rewardRupiah} ditambahkan.`);
@@ -279,18 +278,14 @@ export default function App() {
     handleDepositSimulation(selected);
   };
 
-  const handlePersonaChange = (personaName: 'Alex' | 'Admin') => {
-    setCurrentPersona(personaName);
-  };
-
   const handleLogout = () => {
-    setIsAuthenticated(false);
-    setCurrentView('login');
+    signOut(auth).then(() => {
+      // state reset is handled by onAuthStateChanged
+    }).catch(console.error);
   };
 
   const handleLoginSuccess = () => {
-    setIsAuthenticated(true);
-    setCurrentView('dashboard');
+    // State change is handled by onAuthStateChanged observer automatically
   };
 
   return (
@@ -342,7 +337,8 @@ export default function App() {
             isAuthenticated={isAuthenticated}
             userRole={userRole}
             userName={userName}
-            onChangePersona={handlePersonaChange}
+            balance={balance}
+            isNodeOnline={isNodeOnline}
           />
         )}
 
@@ -362,6 +358,7 @@ export default function App() {
                 onTriggerWasteSim={simulateFullInput}
                 ipUrl={ipUrl}
                 onUpdateIpUrl={handleUpdateIpUrl}
+                balance={balance}
               />
             ) : currentView === 'analytics' ? (
               <AnalyticsView />

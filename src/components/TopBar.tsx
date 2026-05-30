@@ -4,16 +4,17 @@
  */
 
 import React, { useState } from 'react';
-import { Bell, Calendar, UserCheck, ChevronDown, Check, Menu } from 'lucide-react';
+import { Bell, Calendar, UserCheck, Wallet, Menu } from 'lucide-react';
 import { AppView } from '../types';
 
 interface TopBarProps {
   currentView: AppView;
   onChangeView: (view: AppView) => void;
   isAuthenticated: boolean;
-  userRole: 'Eco Specialist' | 'Chief Officer';
+  userRole: string;
   userName: string;
-  onChangePersona: (persona: 'Alex' | 'Admin') => void;
+  balance?: number;
+  isNodeOnline?: boolean;
 }
 
 export default function TopBar({
@@ -22,9 +23,9 @@ export default function TopBar({
   isAuthenticated,
   userRole,
   userName,
-  onChangePersona,
+  balance = 0,
+  isNodeOnline = false,
 }: TopBarProps) {
-  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [notifDropdownOpen, setNotifDropdownOpen] = useState(false);
 
   const notifications = [
@@ -40,7 +41,7 @@ export default function TopBar({
         <img 
           alt="SIPESAT Mobile Logo" 
           className="w-7 h-7 object-contain" 
-          src="https://lh3.googleusercontent.com/aida/ADBb0ujdX2Sa3mAmQfwA8A0zd3JtnZzoVy6b1ccCz8Bnjig7ctt-pLrRW87bpWHG8fqaFkKunO4EI2UoAfbgVuMJPhQ_4F6TNfvxmxey7p-zsNbqwfyox5wwaFgbzny-knhPEx1Ezc0G-awm_HcvxHN7yyFWS5LjsfwM9iHTNMl1g7AJAm6XEN4sXYGVM5Q5QM-eChQ8LAPY2asGM_y2hzJ4_27mXA3SXsuIL2s1SuFqNOC1xKfm2EeyLDXuJ3qD"
+          src="/logo-sipesat.png"
           referrerPolicy="no-referrer"
         />
         <h2 className="font-headline text-lg font-black text-brand-italic text-primary tracking-tighter">
@@ -50,65 +51,28 @@ export default function TopBar({
 
       {/* Desktop-only view stats indicator or live node health */}
       <div className="hidden md:flex items-center gap-2 font-headline text-xs text-on-surface-variant font-medium">
-        <span className="w-2 h-2 rounded-full bg-primary-fixed-dim pulse-dot"></span>
+        <span className={`w-2 h-2 rounded-full ${isNodeOnline ? 'bg-primary-fixed-dim pulse-dot' : 'bg-error'}`}></span>
         <span>Unit SIPESAT-092 :</span>
-        <span className="text-primary-fixed-dim font-bold tracking-widest bg-primary-fixed-dim/10 px-2 py-0.5 rounded uppercase text-[10px]">
-          Command Center Online
+        <span className={`font-bold tracking-widest px-2 py-0.5 rounded uppercase text-[10px] ${isNodeOnline ? 'text-primary-fixed-dim bg-primary-fixed-dim/10' : 'text-error bg-error/10'}`}>
+          {isNodeOnline ? 'Command Center Online' : 'System Offline'}
         </span>
       </div>
 
       {/* Right Utility Options */}
       <div className="flex items-center gap-4 ml-auto">
-        {/* Dynamic Persona Switcher Dropdown (Interactive Premium Feature!) */}
+        
+        {/* User Balance & Profile */}
         {isAuthenticated && (
-          <div className="relative">
-            <button
-              onClick={() => {
-                setDropdownOpen(!dropdownOpen);
-                setNotifDropdownOpen(false);
-              }}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/5 hover:bg-white/10 transition-all font-headline text-xs font-semibold text-on-surface"
-            >
+          <div className="flex items-center gap-3">
+            <div className="hidden sm:flex items-center gap-2 bg-primary/10 border border-primary/20 px-3 py-1.5 rounded-lg text-primary">
+              <Wallet className="w-3.5 h-3.5" />
+              <span className="font-bold text-xs font-mono">Rp {balance.toLocaleString('id-ID')}</span>
+            </div>
+            
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/5 font-headline text-xs font-semibold text-on-surface">
               <UserCheck className="w-3.5 h-3.5 text-primary-fixed-dim" />
               <span className="max-w-[80px] md:max-w-none truncate">{userName}</span>
-              <ChevronDown className="w-3 h-3 text-on-surface-variant" />
-            </button>
-
-            {dropdownOpen && (
-              <div className="absolute right-0 mt-2 w-48 rounded-lg bg-[#141824] border border-white/10 shadow-2xl p-1.5 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-                <p className="text-[10px] uppercase tracking-wider font-bold text-on-surface-variant p-2">
-                  Switch User Session
-                </p>
-                <button
-                  type="button"
-                  onClick={() => {
-                    onChangePersona('Alex');
-                    setDropdownOpen(false);
-                  }}
-                  className="w-full flex items-center justify-between text-left px-3 py-2 rounded-md text-xs hover:bg-white/5 text-on-surface"
-                >
-                  <div className="flex flex-col">
-                    <span className="font-semibold">Alex Rivera</span>
-                    <span className="text-[10px] text-primary-fixed-dim">Eco Specialist</span>
-                  </div>
-                  {userName === 'Alex Rivera' && <Check className="w-3.5 h-3.5 text-primary-fixed-dim" />}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    onChangePersona('Admin');
-                    setDropdownOpen(false);
-                  }}
-                  className="w-full flex items-center justify-between text-left px-3 py-2 rounded-md text-xs hover:bg-white/5 text-on-surface"
-                >
-                  <div className="flex flex-col">
-                    <span className="font-semibold">Admin One</span>
-                    <span className="text-[10px] text-primary-fixed-dim">Chief Officer</span>
-                  </div>
-                  {userName === 'Admin One' && <Check className="w-3.5 h-3.5 text-primary-fixed-dim" />}
-                </button>
-              </div>
-            )}
+            </div>
           </div>
         )}
 
@@ -117,7 +81,6 @@ export default function TopBar({
           <button
             onClick={() => {
               setNotifDropdownOpen(!notifDropdownOpen);
-              setDropdownOpen(false);
             }}
             className="relative font-mono hover:bg-white/5 rounded-full p-2.5 transition-all text-on-surface-variant hover:text-on-surface"
           >
@@ -156,7 +119,7 @@ export default function TopBar({
         <div className="hidden lg:flex items-center gap-2 border-l border-white/10 pl-4">
           <Calendar className="w-4 h-4 text-primary" />
           <span className="font-headline text-xs text-on-surface-variant select-none">
-            Jan 2024 Report
+            {new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
           </span>
         </div>
       </div>

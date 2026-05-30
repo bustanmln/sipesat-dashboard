@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 import time
 import subprocess
+import re
 import RPi.GPIO as GPIO
 import os
 from tflite_runtime.interpreter import Interpreter
@@ -14,6 +15,20 @@ from socketserver import ThreadingMixIn
 import threading
 
 print("=== INISIALISASI SMART WASTE SYSTEM (AI VISION & IOT FIREBASE) ===")
+
+# ==========================================
+# KONFIGURASI STREAMING & TUNNEL
+# ==========================================
+# Set True agar Raspi otomatis membuat tunnel publik via localhost.run
+# sehingga stream bisa diakses dari WiFi manapun di dunia.
+ENABLE_TUNNEL = True
+
+# Kualitas JPEG stream (1-100). Lebih rendah = lebih hemat bandwidth.
+# 70 sudah cukup bagus untuk monitoring, hemat ~40% bandwidth vs 95.
+JPEG_QUALITY = 70
+
+# Port server stream lokal
+STREAM_PORT = 8080
 
 # ==========================================
 # 1. KONFIGURASI FIREBASE CLOUD
@@ -113,7 +128,9 @@ def update_firebase(jenis_sampah, t_baterai, t_atk, t_kemasan):
     except Exception as e:
         print(f"[FIREBASE ERROR] Gagal mengirim data: {e}")
 
-# HTTP Stream Server Handler untuk MJPEG Video Stream
+# ==========================================
+# HTTP STREAM SERVER (MJPEG)
+# ==========================================
 class StreamHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         global latest_frame
@@ -124,6 +141,7 @@ class StreamHandler(BaseHTTPRequestHandler):
             self.send_header('Pragma', 'no-cache')
             self.send_header('Content-Type', 'multipart/x-mixed-replace; boundary=frame')
             self.send_header('Access-Control-Allow-Origin', '*')
+            self.send_header('Access-Control-Allow-Methods', 'GET')
             self.end_headers()
             try:
                 while True:
@@ -136,33 +154,162 @@ class StreamHandler(BaseHTTPRequestHandler):
                         self.wfile.write(f'Content-Length: {len(frame)}\r\n\r\n'.encode())
                         self.wfile.write(frame)
                         self.wfile.write(b'\r\n')
-                        self.wfile.flush() # Mengosongkan buffer agar frame langsung terkirim
-                    time.sleep(0.08) # Mengirimkan frame dengan jeda kecil (~12 FPS)
+                        self.wfile.flush()
+                    time.sleep(0.08) # ~12 FPS
             except Exception as e:
                 print(f"[STREAM INFO] Koneksi klien terputus: {e}")
+        elif self.path == '/':
+            # Halaman info sederhana untuk tes koneksi
+            self.send_response(200)
+            self.send_header('Content-Type', 'text/html')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            self.wfile.write(b'<html><body><h2>SIPESAT Stream Server Active</h2>'
+                           b'<p>Stream: <a href="/stream.mjpg">/stream.mjpg</a></p>'
+                           b'<img src="/stream.mjpg" width="640"/></body></html>')
         else:
             self.send_response(404)
             self.end_headers()
 
     def log_message(self, format, *args):
-        # Mute logging default server agar tidak mengotori terminal Raspi
         return
 
 class ThreadingHTTPServer(ThreadingMixIn, HTTPServer):
-    """Server HTTP dengan dukungan Multi-Threading untuk melayani banyak klien sekaligus"""
-    pass
+    """Server HTTP Multi-Thread"""
+    daemon_threads = True
+    allow_reuse_address = True
 
 def start_stream_server():
     try:
-        server = ThreadingHTTPServer(('0.0.0.0', 8080), StreamHandler)
-        print("[INFO] Server Stream Kamera aktif di http://<IP_RASPBERRY_PI>:8080/stream.mjpg")
+        server = ThreadingHTTPServer(('0.0.0.0', STREAM_PORT), StreamHandler)
+        print(f"[INFO] Server Stream aktif di http://0.0.0.0:{STREAM_PORT}/stream.mjpg")
         server.serve_forever()
     except Exception as e:
         print(f"[ERROR] Gagal menjalankan server stream: {e}")
 
-# Jalankan server HTTP untuk streaming kamera pada thread terpisah (Background)
+# ==========================================
+# AUTO TUNNEL (Multi-Service Fallback)
+# ==========================================
+TUNNEL_SERVICES = [
+    {
+        'name': 'localhost.run',
+        'cmd': ['ssh', '-o', 'StrictHostKeyChecking=no', '-o', 'ConnectTimeout=10',
+                '-o', 'ServerAliveInterval=30', '-R', f'80:localhost:{STREAM_PORT}',
+                'nokey@localhost.run'],
+        'pattern': r'(https://[a-zA-Z0-9._-]+\.lhr\.life)'
+    },
+    {
+        'name': 'serveo.net',
+        'cmd': ['ssh', '-o', 'StrictHostKeyChecking=no', '-o', 'ConnectTimeout=10',
+                '-o', 'ServerAliveInterval=30', '-R', f'80:localhost:{STREAM_PORT}',
+                'serveo.net'],
+        'pattern': r'(https://[a-zA-Z0-9._-]+\.serveo\.net)'
+    },
+]
+
+def try_tunnel_service(service):
+    """Mencoba satu layanan tunnel. Return True jika berhasil mendapat URL."""
+    name = service['name']
+    try:
+        print(f"[TUNNEL] Mencoba {name}...")
+        process = subprocess.Popen(
+            service['cmd'],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            bufsize=1
+        )
+        
+        url_found = False
+        for line in process.stdout:
+            line = line.strip()
+            if line:
+                print(f"[TUNNEL] [{name}] {line}")
+            
+            # Cek apakah ada Connection refused / error
+            if 'Connection refused' in line or 'Connection timed out' in line:
+                print(f"[TUNNEL] {name} gagal: koneksi ditolak.")
+                process.kill()
+                return False
+            
+            match = re.search(service['pattern'], line)
+            if match and not url_found:
+                tunnel_url = match.group(1)
+                stream_url = f"{tunnel_url}/stream.mjpg"
+                url_found = True
+                
+                print(f"")
+                print(f"  +==================================================+")
+                print(f"  |  >>> STREAM PUBLIK AKTIF! ({name}) <<<")
+                print(f"  |  URL: {stream_url}")
+                print(f"  +==================================================+")
+                print(f"")
+                
+                try:
+                    ref_sipesat.update({'camera_url': stream_url})
+                    print(f"[TUNNEL] [OK] URL berhasil dikirim ke Firebase!")
+                    print(f"[TUNNEL] Website SIPESAT akan otomatis menampilkan stream.")
+                except Exception as e:
+                    print(f"[TUNNEL] [WARNING] Gagal kirim URL ke Firebase: {e}")
+                    print(f"[TUNNEL] Masukkan URL manual di website: {stream_url}")
+        
+        if url_found:
+            print(f"[TUNNEL] [WARNING] Tunnel {name} terputus!")
+        return url_found
+        
+    except Exception as e:
+        print(f"[TUNNEL] {name} error: {e}")
+        return False
+
+def start_tunnel():
+    """Mencoba beberapa layanan tunnel secara berurutan."""
+    print("[TUNNEL] Memulai SSH tunnel ke internet...")
+    
+    for service in TUNNEL_SERVICES:
+        if try_tunnel_service(service):
+            return  # Berhasil, selesai
+    
+    # Semua layanan gagal
+    print("")
+    print("[TUNNEL] ============================================")
+    print("[TUNNEL] Semua layanan tunnel gagal!")
+    print("[TUNNEL] Kemungkinan jaringan memblokir SSH (port 22).")
+    print("[TUNNEL]")
+    print("[TUNNEL] ALTERNATIF:")
+    print("[TUNNEL] 1. Gunakan ngrok (install dulu):")
+    print("[TUNNEL]    ngrok http 8080")
+    print("[TUNNEL] 2. Buka stream lokal dari WiFi yang sama:")
+    print(f"[TUNNEL]    http://<IP_RASPI>:{STREAM_PORT}/stream.mjpg")
+    print("[TUNNEL] ============================================")
+    print("")
+
+# Jalankan server stream pada thread terpisah
 stream_thread = threading.Thread(target=start_stream_server, daemon=True)
 stream_thread.start()
+
+# Jalankan tunnel pada thread terpisah (jika diaktifkan)
+if ENABLE_TUNNEL:
+    tunnel_thread = threading.Thread(target=start_tunnel, daemon=True)
+    tunnel_thread.start()
+    time.sleep(1)  # Beri waktu tunnel untuk inisialisasi
+else:
+    print("[INFO] Tunnel dinonaktifkan. Stream hanya bisa diakses dari jaringan lokal.")
+    print(f"[INFO] URL lokal: http://<IP_RASPBERRY_PI>:{STREAM_PORT}/stream.mjpg")
+
+# Fungsi untuk mengirim sinyal kehidupan (heartbeat) ke Firebase
+def heartbeat_loop():
+    while True:
+        try:
+            # Kirim timestamp UTC saat ini (dalam detik)
+            current_timestamp = int(time.time())
+            ref_sipesat.update({'last_heartbeat': current_timestamp})
+        except Exception as e:
+            pass
+        time.sleep(10)
+
+heartbeat_thread = threading.Thread(target=heartbeat_loop, daemon=True)
+heartbeat_thread.start()
+
 
 # ==========================================
 # 5. SETUP MODEL AI (TENSORFLOW LITE)
@@ -227,7 +374,7 @@ def process_and_display():
         if confidence < 0.5:
             last_detected = "MENCARI..."
 
-    # 4. Gambar Tampilan GUI (Overlay Grafis)
+    # 4. Gambar Overlay Grafis pada frame stream
     cv2.putText(img_display, f"STATUS: {status_mesin}", (15, 35), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 255), 2)
     cv2.putText(img_display, f"OBJEK: {last_detected} ({confidence_txt})", (15, 65), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
     
@@ -238,13 +385,11 @@ def process_and_display():
     cv2.putText(img_display, f"1. BATERAI   : {total_baterai}", (25, 410), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (100, 255, 100), 1)
     cv2.putText(img_display, f"2. ATK       : {total_atk}", (25, 430), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 150, 100), 1)
     cv2.putText(img_display, f"3. KEMASAN   : {total_kemasan}", (25, 450), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 100, 255), 1)
-
-    cv2.imshow("SMART WASTE VISUAL MONITOR", img_display)
-    cv2.waitKey(1)
     
-    # Encode frame ke JPEG secara in-memory untuk streaming ke web
+    # Encode frame ke JPEG untuk streaming (tanpa GUI window - hemat RAM)
     try:
-        _, encoded_img = cv2.imencode('.jpg', img_display)
+        encode_params = [cv2.IMWRITE_JPEG_QUALITY, JPEG_QUALITY]
+        _, encoded_img = cv2.imencode('.jpg', img_display, encode_params)
         with frame_lock:
             latest_frame = encoded_img.tobytes()
     except Exception as e:
@@ -341,7 +486,6 @@ finally:
     pwm_servo1.stop()
     pwm_servo2.stop()
     GPIO.cleanup()
-    cv2.destroyAllWindows()
     if os.path.exists(IMAGE_TEMP):
         os.remove(IMAGE_TEMP)
     print("=== SISTEM DIMATIKAN DENGAN AMAN ===")

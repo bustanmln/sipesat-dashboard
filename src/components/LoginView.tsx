@@ -4,33 +4,77 @@
  */
 
 import React, { useState } from 'react';
-import { Mail, Lock, Eye, EyeOff, ShieldAlert } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, ShieldAlert, User } from 'lucide-react';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+import { ref, set } from 'firebase/database';
+import { auth, db } from '../../firebase';
 
 interface LoginViewProps {
   onLoginSuccess: () => void;
 }
 
 export default function LoginView({ onLoginSuccess }: LoginViewProps) {
-  const [email, setEmail] = useState('name@sipesat.tech');
-  const [password, setPassword] = useState('••••••••');
+  const [isSignUp, setIsSignUp] = useState(false);
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [statusMsg, setStatusMsg] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password) {
-      setStatusMsg("Credentials required to sync terminal.");
+    if (!email || !password || (isSignUp && !name)) {
+      setStatusMsg("All fields are required.");
       return;
     }
-    // Simulate encryption verification
-    setStatusMsg("Decrypting node certificate... Authorized!");
-    setTimeout(() => {
-      onLoginSuccess();
-    }, 800);
-  };
+    
+    setIsLoading(true);
+    setStatusMsg("Authenticating...");
 
-  const sipesatLogo = "https://lh3.googleusercontent.com/aida/ADBb0ujdX2Sa3mAmQfwA8A0zd3JtnZzoVy6b1ccCz8Bnjig7ctt-pLrRW87bpWHG8fqaFkKunO4EI2UoAfbgVuMJPhQ_4F6TNfvxmxey7p-zsNbqwfyox5wwaFgbzny-knhPEx1Ezc0G-awm_HcvxHN7yyFWS5LjsfwM9iHTNMl1g7AJAm6XEN4sXYGVM5Q5QM-eChQ8LAPY2asGM_y2hzJ4_27mXA3SXsuIL2s1SuFqNOC1xKfm2EeyLDXuJ3qD";
+    try {
+      if (isSignUp) {
+        // Create user
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+        
+        // Initialize user profile in Database
+        await set(ref(db, `users/${user.uid}`), {
+          name: name,
+          email: email,
+          balance: 0,
+          role: 'Eco Specialist',
+          createdAt: new Date().toISOString()
+        });
+        
+        setStatusMsg("Account created successfully!");
+        setTimeout(() => {
+          onLoginSuccess();
+        }, 800);
+      } else {
+        // Login user
+        await signInWithEmailAndPassword(auth, email, password);
+        setStatusMsg("Authorized!");
+        setTimeout(() => {
+          onLoginSuccess();
+        }, 800);
+      }
+    } catch (error: any) {
+      console.error(error);
+      let errorMessage = "Authentication failed.";
+      if (error.code === 'auth/email-already-in-use') {
+        errorMessage = "Email is already registered.";
+      } else if (error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
+        errorMessage = "Invalid email or password.";
+      } else if (error.code === 'auth/weak-password') {
+        errorMessage = "Password is too weak.";
+      }
+      setStatusMsg(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="relative w-full max-w-[480px] mx-auto z-10 animate-in fade-in zoom-in-95 duration-500">
@@ -55,7 +99,7 @@ export default function LoginView({ onLoginSuccess }: LoginViewProps) {
             Sistem Pemilah Sampah Terpadu
           </p>
           <p className="font-headline text-[11px] text-on-surface-variant mt-2 opacity-60">
-            Edge AI & IoT Command Center
+            {isSignUp ? "Create Your Account" : "Edge AI & IoT Command Center"}
           </p>
         </div>
 
@@ -70,10 +114,33 @@ export default function LoginView({ onLoginSuccess }: LoginViewProps) {
         {/* Login Form */}
         <form className="space-y-6" onSubmit={handleSubmit}>
           
+          {/* Name field (Only for Sign Up) */}
+          {isSignUp && (
+            <div className="group animate-in slide-in-from-top-2">
+              <label className="block text-xs font-semibold text-on-surface-variant mb-2 ml-1" htmlFor="name">
+                Full Name
+              </label>
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant group-focus-within:text-primary-fixed-dim transition-colors">
+                  <User className="w-4 h-4" />
+                </span>
+                <input
+                  id="name"
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full bg-surface-container-high/40 border-b-2 border-white/5 focus:border-primary-fixed-dim focus:ring-0 text-on-surface font-sans text-sm pl-12 pr-4 py-3.5 transition-all duration-300 outline-none"
+                  placeholder="Your Name"
+                  disabled={isLoading}
+                />
+              </div>
+            </div>
+          )}
+
           {/* Email field with active highlight */}
           <div className="group">
             <label className="block text-xs font-semibold text-on-surface-variant mb-2 ml-1" htmlFor="email">
-              Work Email
+              Email Address
             </label>
             <div className="relative">
               <span className="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant group-focus-within:text-primary-fixed-dim transition-colors">
@@ -85,7 +152,8 @@ export default function LoginView({ onLoginSuccess }: LoginViewProps) {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full bg-surface-container-high/40 border-b-2 border-white/5 focus:border-primary-fixed-dim focus:ring-0 text-on-surface font-sans text-sm pl-12 pr-4 py-3.5 transition-all duration-300 outline-none"
-                placeholder="name@sipesat.tech"
+                placeholder="name@example.com"
+                disabled={isLoading}
               />
             </div>
           </div>
@@ -93,7 +161,7 @@ export default function LoginView({ onLoginSuccess }: LoginViewProps) {
           {/* Password field with dynamic visibility toggle */}
           <div className="group">
             <label className="block text-xs font-semibold text-on-surface-variant mb-2 ml-1" htmlFor="password">
-              Access Key
+              Password
             </label>
             <div className="relative">
               <span className="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant group-focus-within:text-primary-fixed-dim transition-colors">
@@ -106,93 +174,70 @@ export default function LoginView({ onLoginSuccess }: LoginViewProps) {
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full bg-surface-container-high/40 border-b-2 border-white/5 focus:border-primary-fixed-dim focus:ring-0 text-on-surface font-sans text-sm pl-12 pr-12 py-3.5 transition-all duration-300 outline-none"
                 placeholder="••••••••"
+                disabled={isLoading}
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-on-surface transition-colors"
+                disabled={isLoading}
               >
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
           </div>
 
-          {/* Remember me & reset link */}
-          <div className="flex items-center justify-between">
-            <label className="flex items-center gap-2 cursor-pointer group">
-              <input
-                type="checkbox"
-                checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
-                className="w-4 h-4 rounded bg-[#171b26] border-white/10 text-primary-fixed-dim focus:ring-primary-fixed-dim focus:ring-offset-surface"
-              />
-              <span className="text-xs font-medium text-on-surface-variant group-hover:text-on-surface transition-colors">
-                Remember device
-              </span>
-            </label>
-            <a 
-              href="#reset" 
-              onClick={(e) => { e.preventDefault(); setStatusMsg("Secure reset token has been dispatched to administrators."); }}
-              className="text-xs font-bold text-primary-fixed-dim hover:text-primary transition-colors"
-            >
-              Reset Encryption?
-            </a>
-          </div>
+          {!isSignUp && (
+            <div className="flex items-center justify-between">
+              <label className="flex items-center gap-2 cursor-pointer group">
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="w-4 h-4 rounded bg-[#171b26] border-white/10 text-primary-fixed-dim focus:ring-primary-fixed-dim focus:ring-offset-surface"
+                />
+                <span className="text-xs font-medium text-on-surface-variant group-hover:text-on-surface transition-colors">
+                  Remember device
+                </span>
+              </label>
+              <a 
+                href="#reset" 
+                onClick={(e) => { e.preventDefault(); setStatusMsg("Password reset is not configured yet."); }}
+                className="text-xs font-bold text-primary-fixed-dim hover:text-primary transition-colors"
+              >
+                Forgot Password?
+              </a>
+            </div>
+          )}
 
           {/* Primary Submit Button */}
           <button
             type="submit"
-            className="w-full bg-primary-fixed-dim text-on-primary-fixed font-headline text-sm font-black py-4 rounded-lg transition-all duration-300 neon-glow-primary neon-glow-primary-hover active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
+            disabled={isLoading}
+            className={`w-full bg-primary-fixed-dim text-on-primary-fixed font-headline text-sm font-black py-4 rounded-lg transition-all duration-300 neon-glow-primary neon-glow-primary-hover flex items-center justify-center gap-2 ${isLoading ? 'opacity-70 cursor-not-allowed' : 'active:scale-95 cursor-pointer'}`}
           >
             <Lock className="w-4 h-4" />
-            Access Ecosystem
+            {isSignUp ? "Create Account" : "Access Ecosystem"}
           </button>
-
-          {/* Divider */}
-          <div className="flex items-center gap-4 py-2">
-            <div className="h-[1px] flex-1 bg-white/10"></div>
-            <span className="text-[10px] font-headline font-bold text-on-surface-variant text-center tracking-[0.1em]">
-              OR CONNECT VIA
-            </span>
-            <div className="h-[1px] flex-1 bg-white/10"></div>
-          </div>
-
-          {/* Social Sign In (Mock Google connection) */}
-          <button
-            type="button"
-            onClick={onLoginSuccess}
-            className="w-full glass-panel bg-white/5 border border-white/10 text-on-surface font-headline text-xs font-bold py-4 rounded-lg flex items-center justify-center gap-3 hover:bg-white/10 transition-all duration-300 active:scale-95"
-          >
-            <img 
-              alt="Google Icon" 
-              className="w-4 h-4" 
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuD3Wv7NsgoOGrxIuQWEFfa1JPSZnC0un358lF5ynf9U6WYaxSLbPFVg_Rl-CVc2PpjE6FIWEzvpDXQwc0t6dnc8mvvAXyieyoytKiP8_TiJ3M3OVLzeH9wo3aRSwtp6EQwYQGsfasR4Js6JZNfDFQYh2fNiy0CE2WSBwcLcCcuarDObes3IAx1EWP1QUByPnpHttj38CMUtxYVE5WCZ9KBtmdk64WYKzgiH6BK72YlZZq5y1Nuu2FIy7XLP502uawz9rR3mwxtXg30H"
-              referrerPolicy="no-referrer"
-            />
-            Sign in with Google
-          </button>
+          
         </form>
 
         {/* Footer info link */}
         <div className="mt-8 text-center border-t border-white/5 pt-6">
           <p className="text-xs text-on-surface-variant">
-            New to SIPESAT? 
-            <a 
-              href="#register" 
-              onClick={(e) => { e.preventDefault(); setStatusMsg("Register module is restricted to Edge nodes only."); }}
-              className="text-primary-fixed-dim font-black hover:underline underline-offset-4 ml-1.5"
+            {isSignUp ? "Already have an account?" : "New to SIPESAT?"}
+            <button 
+              type="button"
+              onClick={() => {
+                setIsSignUp(!isSignUp);
+                setStatusMsg(null);
+              }}
+              className="text-primary-fixed-dim font-black hover:underline underline-offset-4 ml-1.5 cursor-pointer"
             >
-              Create Account
-            </a>
+              {isSignUp ? "Log In Here" : "Create Account"}
+            </button>
           </p>
         </div>
-      </div>
-
-      {/* Utility terms */}
-      <div className="mt-8 flex justify-center gap-6 text-[11px] text-on-surface-variant">
-        <a href="#privacy" className="hover:text-on-surface transition-colors">Privacy Protocol</a>
-        <a href="#terms" className="hover:text-on-surface transition-colors">Terms of Sync</a>
-        <a href="#support" className="hover:text-on-surface transition-colors">Global Support</a>
       </div>
     </div>
   );
