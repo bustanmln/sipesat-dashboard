@@ -5,20 +5,55 @@
 
 import React, { useState } from 'react';
 import { Download, Cpu, Sparkles, Wifi, Radio, TrendingUp, HelpCircle } from 'lucide-react';
-import { NodeStatus } from '../types';
+import { NodeStatus, BinCapacity } from '../types';
 
-export default function AnalyticsView() {
+interface AnalyticsViewProps {
+  binCapacities: BinCapacity[];
+}
+
+export default function AnalyticsView({ binCapacities }: AnalyticsViewProps) {
   const [hoveredSegment, setHoveredSegment] = useState<string | null>(null);
   const [exporting, setExporting] = useState(false);
   const [successToast, setSuccessToast] = useState(false);
 
-  // Sorting breakdown metrics matching coordinates & screenshots
-  const segments = [
-    { id: 'battery', name: 'Baterai', value: 40, color: '#4ADE80', displayOffset: 150.7, strokeArray: '251.2 251.2' }, 
-    { id: 'atk', name: 'ATK', value: 25, color: '#3B82F6', displayOffset: 213.5, strokeArray: '251.2 251.2' },
-    { id: 'box', name: 'Kotak', value: 20, color: '#F87171', displayOffset: 226.1, strokeArray: '251.2 251.2' },
-    { id: 'bottle', name: 'Botol', value: 15, color: '#FACC15', displayOffset: 238.6, strokeArray: '251.2 251.2' },
-  ];
+  // Calculate dynamic stats
+  const totalCount = binCapacities.reduce((sum, bin) => sum + bin.currentCount, 0);
+
+  // Average weight per item in kg
+  const weightMap: Record<string, number> = {
+    battery: 0.05,
+    atk: 0.03,
+    box: 0.15,
+    bottle: 0.04
+  };
+  
+  const totalWeight = binCapacities.reduce((sum, bin) => sum + (bin.currentCount * (weightMap[bin.id] || 0.05)), 0).toFixed(1);
+
+  // Dynamic segments for SVG Donut
+  let accumulatedPercentage = 0;
+  const processedSegments = binCapacities.map((bin) => {
+    const pct = totalCount > 0 ? (bin.currentCount / totalCount) * 100 : 25;
+    const circumference = 251.2;
+    const strokeDashoffset = circumference - (circumference * pct) / 100;
+    const rotation = (accumulatedPercentage / 100) * 360;
+    
+    accumulatedPercentage += pct;
+
+    return {
+      id: bin.id,
+      name: bin.name,
+      value: Math.round(pct),
+      color: bin.colorHex,
+      strokeDashoffset,
+      rotation,
+      currentCount: bin.currentCount
+    };
+  });
+
+  // Dynamic AI evaluation recommendation based on highest count
+  const sortedBinsForRecommendation = [...binCapacities].sort((a, b) => b.currentCount - a.currentCount);
+  const dominantBin = sortedBinsForRecommendation[0];
+  const secondaryBin = sortedBinsForRecommendation[1] || sortedBinsForRecommendation[0];
 
   const nodeStatuses: NodeStatus[] = [
     { id: '1', name: 'Central Sorting Hub', status: 'ONLINE', colorClass: 'bg-primary-fixed-dim' },
@@ -33,6 +68,11 @@ export default function AnalyticsView() {
       setTimeout(() => setSuccessToast(false), 3000);
     }, 1500);
   };
+
+  // Dynamic trends based on total counts
+  const recyclingRate = totalCount > 0 ? (24.5 + (totalCount * 0.2)).toFixed(1) : "24.5";
+  const co2Offset = totalCount > 0 ? (1240 + (totalCount * 1.5)).toFixed(0) : "1240";
+  const energySaved = totalCount > 0 ? (842 + (totalCount * 0.8)).toFixed(0) : "842";
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
@@ -98,68 +138,27 @@ export default function AnalyticsView() {
               <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
                 <circle className="text-white/5" cx="50" cy="50" fill="transparent" r="40" stroke="currentColor" strokeWidth="12"></circle>
                 
-                 {/* Baterai: 40% */}
-                <circle 
-                  onMouseEnter={() => setHoveredSegment('battery')}
-                  onMouseLeave={() => setHoveredSegment(null)}
-                  className="transition-all duration-300 cursor-pointer"
-                  cx="50" 
-                  cy="50" 
-                  r="40" 
-                  stroke="#4ADE80" 
-                  strokeWidth={hoveredSegment === 'battery' ? '15' : '10'}
-                  fill="transparent"
-                  strokeDasharray="251.2" 
-                  strokeDashoffset="150.7"
-                ></circle>
-
-                {/* ATK: 25% */}
-                <circle 
-                  onMouseEnter={() => setHoveredSegment('atk')}
-                  onMouseLeave={() => setHoveredSegment(null)}
-                  className="transition-all duration-300 cursor-pointer"
-                  cx="50" 
-                  cy="50" 
-                  r="40" 
-                  stroke="#3B82F6" 
-                  strokeWidth={hoveredSegment === 'atk' ? '15' : '10'}
-                  fill="transparent"
-                  strokeDasharray="251.2" 
-                  strokeDashoffset="213.5"
-                  style={{ transform: 'rotate(144deg)', transformOrigin: '50% 50%' }}
-                ></circle>
-
-                {/* Kotak: 20% */}
-                <circle 
-                  onMouseEnter={() => setHoveredSegment('box')}
-                  onMouseLeave={() => setHoveredSegment(null)}
-                  className="transition-all duration-300 cursor-pointer"
-                  cx="50" 
-                  cy="50" 
-                  r="40" 
-                  stroke="#F87171" 
-                  strokeWidth={hoveredSegment === 'box' ? '15' : '10'}
-                  fill="transparent"
-                  strokeDasharray="251.2" 
-                  strokeDashoffset="226.1"
-                  style={{ transform: 'rotate(234deg)', transformOrigin: '50% 50%' }}
-                ></circle>
-
-                {/* Botol: 15% */}
-                <circle 
-                  onMouseEnter={() => setHoveredSegment('bottle')}
-                  onMouseLeave={() => setHoveredSegment(null)}
-                  className="transition-all duration-300 cursor-pointer"
-                  cx="50" 
-                  cy="50" 
-                  r="40" 
-                  stroke="#FACC15" 
-                  strokeWidth={hoveredSegment === 'bottle' ? '15' : '10'}
-                  fill="transparent"
-                  strokeDasharray="251.2" 
-                  strokeDashoffset="238.6"
-                  style={{ transform: 'rotate(306deg)', transformOrigin: '50% 50%' }}
-                ></circle>
+                {processedSegments.map((s) => (
+                  <circle 
+                    key={s.id}
+                    onMouseEnter={() => setHoveredSegment(s.id)}
+                    onMouseLeave={() => setHoveredSegment(null)}
+                    className="transition-all duration-300 cursor-pointer"
+                    cx="50" 
+                    cy="50" 
+                    r="40" 
+                    stroke={s.color} 
+                    strokeWidth={hoveredSegment === s.id ? '14' : '10'}
+                    fill="transparent"
+                    strokeDasharray="251.2" 
+                    strokeDashoffset={s.strokeDashoffset}
+                    style={{ 
+                      transform: `rotate(${s.rotation}deg)`, 
+                      transformOrigin: '50% 50%',
+                      transition: 'stroke-width 0.3s ease, stroke-dashoffset 0.5s ease, transform 0.5s ease'
+                    }}
+                  ></circle>
+                ))}
               </svg>
               
               <div className="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none">
@@ -167,14 +166,14 @@ export default function AnalyticsView() {
                   Total Weight
                 </span>
                 <span className="text-3xl font-black text-white font-headline mt-0.5">
-                  42.8<span className="text-sm font-medium text-on-surface-variant ml-0.5">kg</span>
+                  {totalWeight}<span className="text-sm font-medium text-on-surface-variant ml-0.5">kg</span>
                 </span>
               </div>
             </div>
 
             {/* Grid display stats */}
             <div className="grid grid-cols-2 gap-3 w-full md:w-auto">
-              {segments.map((s) => (
+              {processedSegments.map((s) => (
                 <div 
                   key={s.id}
                   onMouseEnter={() => setHoveredSegment(s.id)}
@@ -189,9 +188,14 @@ export default function AnalyticsView() {
                   <p className="font-headline text-xs text-on-surface font-semibold">
                     {s.name}
                   </p>
-                  <p className="text-lg font-black text-white mt-1">
-                    {s.value}%
-                  </p>
+                  <div className="flex items-baseline gap-1.5 mt-1">
+                    <p className="text-lg font-black text-white">
+                      {s.value}%
+                    </p>
+                    <p className="text-[10px] text-on-surface-variant font-mono">
+                      ({s.currentCount} pcs)
+                    </p>
+                  </div>
                 </div>
               ))}
             </div>
@@ -215,7 +219,16 @@ export default function AnalyticsView() {
             </div>
 
             <p className="font-sans text-[15px] leading-relaxed text-on-surface">
-              Bulan ini Anda dominan menyetor <span className="text-primary-fixed-dim font-extrabold bg-primary/10 px-1.5 py-0.5 rounded">Baterai</span>. Luar biasa, Anda telah menyelamatkan lingkungan dari bahaya korosi limbah B3! Coba tingkatkan setoran <span className="text-secondary font-semibold">Botol Plastik</span> bulan depan untuk perolehan poin optimal.
+              {totalCount > 0 ? (
+                <>
+                  Bulan ini sistem dominan menyortir <span className="text-primary-fixed-dim font-extrabold bg-primary/10 px-1.5 py-0.5 rounded">{dominantBin.name}</span> dengan jumlah total <span className="font-bold">{dominantBin.currentCount} unit</span>. 
+                  Luar biasa, Anda telah mengoptimalkan pembuangan jenis limbah ini! Coba dorong pemilahan kategori <span className="text-secondary font-semibold">{secondaryBin.name}</span> untuk meningkatkan efisiensi sirkular secara keseluruhan.
+                </>
+              ) : (
+                <>
+                  Belum ada data pemilahan aktif terdeteksi. Silakan aktifkan mesin SIPESAT atau gunakan simulator pada menu <span className="text-primary-fixed-dim font-semibold">Devices</span> untuk memulai pencatatan dan evaluasi AI.
+                </>
+              )}
             </p>
 
             <div className="flex items-center gap-4 pt-5 mt-5 border-t border-white/10">
@@ -228,7 +241,7 @@ export default function AnalyticsView() {
                 </span>
               </div>
               <span className="text-[11px] font-bold text-on-surface-variant opacity-75 uppercase font-headline">
-                SIPESAT Impact: +12% Efficiency
+                SIPESAT Impact: +{totalCount > 0 ? (12 + (totalCount * 0.15)).toFixed(1) : "12.0"}% Efficiency
               </span>
             </div>
           </div>
@@ -273,7 +286,7 @@ export default function AnalyticsView() {
               Recycling Rate
             </span>
             <h4 className="text-2xl font-black text-primary-fixed-dim mt-1">
-              +24.5%
+              +{recyclingRate}%
             </h4>
           </div>
           <div className="h-12 w-full mt-4 bg-primary/5 rounded-lg relative overflow-hidden">
@@ -291,7 +304,7 @@ export default function AnalyticsView() {
               CO2 Offset
             </span >
             <h4 className="text-2xl font-black text-secondary-fixed-dim mt-1">
-              1,240<span className="text-xs font-normal text-on-surface-variant ml-0.5">kg</span>
+              {co2Offset}<span className="text-xs font-normal text-on-surface-variant ml-0.5">kg</span>
             </h4>
           </div>
           <div className="h-12 w-full mt-4 bg-secondary-container/5 rounded-lg relative overflow-hidden">
@@ -309,7 +322,7 @@ export default function AnalyticsView() {
               Energy Saved
             </span>
             <h4 className="text-2xl font-black text-white mt-1">
-              842<span className="text-xs font-normal text-on-surface-variant ml-0.5">kWh</span>
+              {energySaved}<span className="text-xs font-normal text-on-surface-variant ml-0.5">kWh</span>
             </h4>
           </div>
           <div className="h-12 w-full mt-4 bg-white/5 rounded-lg relative overflow-hidden">

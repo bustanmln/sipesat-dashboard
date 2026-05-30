@@ -6,6 +6,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { LayoutDashboard, BarChart3, Binary, LogIn, Sparkles, RefreshCw, AlertCircle } from 'lucide-react';
 import { ref, onValue, set } from 'firebase/database';
+import { motion, AnimatePresence } from 'framer-motion';
 import { db } from '../firebase';
 import Sidebar from './components/Sidebar';
 import TopBar from './components/TopBar';
@@ -159,12 +160,12 @@ export default function App() {
       percentage: 60,
       maxVolume: 80,
       currentCount: 48,
-      colorHex: '#4ADE80',
+      colorHex: '#FACC15', // Set to yellow to match Analytics Donut chart colors
     },
   ]);
 
-  // Derived dashboard quick values
-  const [sortedToday, setSortedToday] = useState<number>(124);
+  // Derived dynamically based on current capacities
+  const sortedTodayCount = 120 + binCapacities.reduce((acc, bin) => acc + bin.currentCount, 0);
   const [uptime, setUptime] = useState<string>('99.8');
 
   // Triggered notifications tray alert
@@ -215,9 +216,6 @@ export default function App() {
     };
 
     set(ref(db, `sipesat/global_transactions/${txId}`), newTx);
-
-    // 3. Increment counters
-    setSortedToday((prev) => prev + 1);
 
     // 5. Toast alert success feedback
     setAlertToast(`Identified ${binId.toUpperCase()}! Insentif +Rp ${rewardRupiah} ditambahkan.`);
@@ -297,44 +295,63 @@ export default function App() {
           />
         )}
 
-        {/* Content viewport panel */}
+        {/* Content viewport panel with transition wrapper */}
         <main className={`flex-1 flex flex-col justify-center px-4 sm:px-6 md:py-6 ${
           hasEntered 
             ? 'pt-24 pb-32 md:pb-12 md:pl-[304px] md:pr-10' 
             : 'pt-12 pb-12 items-center'
         }`}>
           <div className="w-full max-w-[1360px] mx-auto">
-            {!hasEntered ? (
-              <WelcomeView onEnter={() => { setHasEntered(true); setCurrentView('dashboard'); }} />
-            ) : currentView === 'dashboard' ? (
-              <DashboardView 
-                transactions={transactions} 
-                binCapacities={binCapacities}
-                onTriggerWasteSim={simulateFullInput}
-                ipUrl={ipUrl}
-                onUpdateIpUrl={handleUpdateIpUrl}
-                balance={balance}
-              />
-            ) : currentView === 'analytics' ? (
-              <AnalyticsView />
-            ) : currentView === 'devices' ? (
-              <DevicesView 
-                binCapacities={binCapacities} 
-                onDepositSimulate={handleDepositSimulation}
-                sortedToday={sortedToday}
-                uptime={uptime}
-              />
-            ) : (
-              // Fallback just-in-case
-              <DashboardView 
-                transactions={transactions} 
-                binCapacities={binCapacities}
-                onTriggerWasteSim={simulateFullInput}
-                ipUrl={ipUrl}
-                onUpdateIpUrl={handleUpdateIpUrl}
-                balance={balance}
-              />
-            )}
+            <AnimatePresence mode="wait">
+              {!hasEntered ? (
+                <motion.div
+                  key="welcome"
+                  initial={{ opacity: 0, scale: 0.98 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.98 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <WelcomeView onEnter={() => { setHasEntered(true); setCurrentView('dashboard'); }} />
+                </motion.div>
+              ) : (
+                <motion.div
+                  key={currentView}
+                  initial={{ opacity: 0, y: 15 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -15 }}
+                  transition={{ duration: 0.25, ease: "easeInOut" }}
+                >
+                  {currentView === 'dashboard' ? (
+                    <DashboardView 
+                      transactions={transactions} 
+                      binCapacities={binCapacities}
+                      onTriggerWasteSim={simulateFullInput}
+                      ipUrl={ipUrl}
+                      onUpdateIpUrl={handleUpdateIpUrl}
+                      balance={balance}
+                    />
+                  ) : currentView === 'analytics' ? (
+                    <AnalyticsView binCapacities={binCapacities} />
+                  ) : currentView === 'devices' ? (
+                    <DevicesView 
+                      binCapacities={binCapacities} 
+                      onDepositSimulate={handleDepositSimulation}
+                      sortedToday={sortedTodayCount}
+                      uptime={uptime}
+                    />
+                  ) : (
+                    <DashboardView 
+                      transactions={transactions} 
+                      binCapacities={binCapacities}
+                      onTriggerWasteSim={simulateFullInput}
+                      ipUrl={ipUrl}
+                      onUpdateIpUrl={handleUpdateIpUrl}
+                      balance={balance}
+                    />
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </main>
 
