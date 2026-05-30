@@ -14,7 +14,7 @@ interface LoginViewProps {
 }
 
 export default function LoginView({ onLoginSuccess }: LoginViewProps) {
-  const sipesatLogo = "/logo-sipesat.png";
+  const sipesatLogo = `${(import.meta as any).env.BASE_URL}logo-sipesat.png`;
   const [isSignUp, setIsSignUp] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -63,13 +63,15 @@ export default function LoginView({ onLoginSuccess }: LoginViewProps) {
       }
     } catch (error: any) {
       console.error(error);
-      let errorMessage = "Authentication failed.";
+      let errorMessage = error.message || "Authentication failed.";
       if (error.code === 'auth/email-already-in-use') {
         errorMessage = "Email is already registered.";
       } else if (error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
-        errorMessage = "Invalid email or password.";
+        errorMessage = "Invalid email or password. Please register first using 'Create Account' at the bottom.";
       } else if (error.code === 'auth/weak-password') {
         errorMessage = "Password is too weak.";
+      } else if (error.code === 'auth/operation-not-allowed') {
+        errorMessage = "Email/Password sign-in method is disabled. Please enable it in Firebase Console -> Authentication -> Sign-in method.";
       }
       setStatusMsg(errorMessage);
     } finally {

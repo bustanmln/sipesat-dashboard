@@ -24,7 +24,7 @@ export default function Sidebar({
   userRole,
   userName,
 }: SidebarProps) {
-  const logoUrl = "/logo-sipesat.png";
+  const logoUrl = `${(import.meta as any).env.BASE_URL}logo-sipesat.png`;
 
   const menuItems = [
     { id: 'dashboard' as AppView, label: 'Dashboard', icon: LayoutDashboard },

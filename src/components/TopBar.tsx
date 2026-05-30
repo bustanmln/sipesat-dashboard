@@ -41,7 +41,7 @@ export default function TopBar({
         <img 
           alt="SIPESAT Mobile Logo" 
           className="w-7 h-7 object-contain" 
-          src="/logo-sipesat.png"
+          src={`${(import.meta as any).env.BASE_URL}logo-sipesat.png`}
           referrerPolicy="no-referrer"
         />
         <h2 className="font-headline text-lg font-black text-brand-italic text-primary tracking-tighter">
