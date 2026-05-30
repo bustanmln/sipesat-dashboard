@@ -6,26 +6,24 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { LayoutDashboard, BarChart3, Binary, LogIn, Sparkles, RefreshCw, AlertCircle } from 'lucide-react';
 import { ref, onValue, set } from 'firebase/database';
-import { onAuthStateChanged, signOut, User } from 'firebase/auth';
-import { auth, db } from '../firebase';
+import { db } from '../firebase';
 import Sidebar from './components/Sidebar';
 import TopBar from './components/TopBar';
-import LoginView from './components/LoginView';
+import WelcomeView from './components/WelcomeView';
 import DashboardView from './components/DashboardView';
 import AnalyticsView from './components/AnalyticsView';
 import DevicesView from './components/DevicesView';
 import { AppView, TransactionItem, BinCapacity } from './types';
 
 export default function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const [user, setUser] = useState<User | null>(null);
-  const [currentView, setCurrentView] = useState<AppView>('login');
+  const [hasEntered, setHasEntered] = useState<boolean>(false);
+  const [currentView, setCurrentView] = useState<AppView>('dashboard');
   
-  const [userName, setUserName] = useState('');
-  const [userRole, setUserRole] = useState<'Eco Specialist' | 'Chief Officer'>('Eco Specialist');
+  const [userName, setUserName] = useState('Operator SIPESAT');
+  const [userRole, setUserRole] = useState<'Eco Specialist' | 'Chief Officer'>('Chief Officer');
 
-  // Integrated live balance
-  const [balance, setBalance] = useState<number>(0);
+  // Integrated live balance (synced with Firebase)
+  const [balance, setBalance] = useState<number>(25000);
   const [transactions, setTransactions] = useState<TransactionItem[]>([]);
 
   const [ipUrl, setIpUrl] = useState<string>('http://192.168.18.168:8080/stream.mjpg');
@@ -45,52 +43,7 @@ export default function App() {
     return () => clearInterval(interval);
   }, []);
 
-  // Firebase Auth State Listener
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      setIsAuthenticated(!!currentUser);
-      if (currentUser) {
-        setCurrentView('dashboard');
-      } else {
-        setCurrentView('login');
-        // Reset state on logout
-        setUserName('');
-        setBalance(0);
-        setTransactions([]);
-      }
-    });
-    return () => unsubscribe();
-  }, []);
-
-  // Sync Current User Data (Profile, Balance, Transactions)
-  useEffect(() => {
-    if (!user) return;
-    
-    const userRef = ref(db, `users/${user.uid}`);
-    const unsubscribeUser = onValue(userRef, (snapshot) => {
-      const data = snapshot.val();
-      if (data) {
-        setUserName(data.name || user.email || 'User');
-        setUserRole(data.role || 'Eco Specialist');
-        setBalance(data.balance || 0);
-        
-        if (data.transactions) {
-          // Convert object to array and sort by id (which contains timestamp) descending
-          const txArray: TransactionItem[] = Object.values(data.transactions);
-          txArray.sort((a, b) => b.id.localeCompare(a.id));
-          setTransactions(txArray.slice(0, 20));
-        } else {
-          setTransactions([]);
-        }
-      }
-    });
-
-    return () => unsubscribeUser();
-  }, [user]);
-
-
-  // Firebase Realtime Database Synchronization (Global Device Data)
+  // Firebase Realtime Database Synchronization (Global Device Data & Stats)
   useEffect(() => {
     const sipesatRef = ref(db, 'sipesat');
     const unsubscribe = onValue(sipesatRef, (snapshot) => {
@@ -108,7 +61,19 @@ export default function App() {
           setIpUrl(data.camera_url);
         }
 
-        // 1. Sync counters to binCapacities
+        // 1. Sync global balance
+        if (data.global_balance !== undefined) {
+          setBalance(data.global_balance);
+        }
+
+        // 2. Sync global transactions
+        if (data.global_transactions) {
+          const txArray: TransactionItem[] = Object.values(data.global_transactions);
+          txArray.sort((a, b) => b.id.localeCompare(a.id));
+          setTransactions(txArray.slice(0, 20));
+        }
+
+        // 3. Sync counters to binCapacities
         if (data.counter) {
           setBinCapacities((prevBins) =>
             prevBins.map((bin) => {
@@ -141,9 +106,7 @@ export default function App() {
           );
         }
 
-        // 2. Trigger alert toast if status_terakhir changes
-        // We only show a toast for physical machine events, we don't automatically assign points
-        // because we don't know who is at the machine. (Use simulation to claim points).
+        // 4. Trigger alert toast if status_terakhir changes
         if (data.status_terakhir && data.status_terakhir !== lastStatusLog.current) {
           lastStatusLog.current = data.status_terakhir;
           setAlertToast(`SIPESAT AI: ${data.status_terakhir}`);
@@ -207,7 +170,7 @@ export default function App() {
   // Triggered notifications tray alert
   const [alertToast, setAlertToast] = useState<string | null>(null);
 
-  // Live simulation event! Stores points to current logged-in user.
+  // Live simulation event! Stores points globally in Firebase.
   const handleDepositSimulation = (binId: 'battery' | 'atk' | 'box' | 'bottle') => {
     // 1. Calculate updates for global bins (simulated)
     const updatedBins = binCapacities.map((item) => {
@@ -225,35 +188,33 @@ export default function App() {
 
     setBinCapacities(updatedBins);
 
-    // 2. Add verification points
+    // 2. Add verification points globally in Firebase Realtime Database
     const rewardRupiah = binId === 'battery' ? 500 : binId === 'bottle' ? 500 : binId === 'atk' ? 400 : 350;
     
-    if (user) {
-      const newBalance = balance + rewardRupiah;
-      set(ref(db, `users/${user.uid}/balance`), newBalance);
+    const newBalance = balance + rewardRupiah;
+    set(ref(db, `sipesat/global_balance`), newBalance);
 
-      const now = new Date();
-      const mapLabel = {
-        battery: 'Deposit Baterai (1)',
-        atk: 'Deposit ATK (1)',
-        box: 'Deposit Kemasan Kotak (1)',
-        bottle: 'Deposit Botol Kecil (1)',
-      };
+    const now = new Date();
+    const mapLabel = {
+      battery: 'Deposit Baterai (1)',
+      atk: 'Deposit ATK (1)',
+      box: 'Deposit Kemasan Kotak (1)',
+      bottle: 'Deposit Botol Kecil (1)',
+    };
 
-      const txId = `tx-${Date.now()}`;
-      const newTx: TransactionItem = {
-        id: txId,
-        title: mapLabel[binId],
-        count: 1,
-        date: now.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }),
-        time: now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
-        status: 'Selesai',
-        amount: rewardRupiah,
-        type: binId,
-      };
+    const txId = `tx-${Date.now()}`;
+    const newTx: TransactionItem = {
+      id: txId,
+      title: mapLabel[binId],
+      count: 1,
+      date: now.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }),
+      time: now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }),
+      status: 'Selesai',
+      amount: rewardRupiah,
+      type: binId,
+    };
 
-      set(ref(db, `users/${user.uid}/transactions/${txId}`), newTx);
-    }
+    set(ref(db, `sipesat/global_transactions/${txId}`), newTx);
 
     // 3. Increment counters
     setSortedToday((prev) => prev + 1);
@@ -278,14 +239,8 @@ export default function App() {
     handleDepositSimulation(selected);
   };
 
-  const handleLogout = () => {
-    signOut(auth).then(() => {
-      // state reset is handled by onAuthStateChanged
-    }).catch(console.error);
-  };
-
-  const handleLoginSuccess = () => {
-    // State change is handled by onAuthStateChanged observer automatically
+  const handleExitDashboard = () => {
+    setHasEntered(false);
   };
 
   return (
@@ -318,23 +273,23 @@ export default function App() {
       <div className="relative z-10 min-h-screen flex flex-col">
         
         {/* Sidebar Nav (collapses on mobile size) */}
-        {isAuthenticated && (
+        {hasEntered && (
           <Sidebar
             currentView={currentView}
             onChangeView={setCurrentView}
-            isAuthenticated={isAuthenticated}
-            onLogout={handleLogout}
+            isAuthenticated={hasEntered}
+            onLogout={handleExitDashboard}
             userRole={userRole}
             userName={userName}
           />
         )}
 
         {/* Top Header Panel (collapses/adjusts to left margin when sidebar is shown) */}
-        {isAuthenticated && (
+        {hasEntered && (
           <TopBar
             currentView={currentView}
             onChangeView={setCurrentView}
-            isAuthenticated={isAuthenticated}
+            isAuthenticated={hasEntered}
             userRole={userRole}
             userName={userName}
             balance={balance}
@@ -344,13 +299,13 @@ export default function App() {
 
         {/* Content viewport panel */}
         <main className={`flex-1 flex flex-col justify-center px-4 sm:px-6 md:py-6 ${
-          isAuthenticated 
+          hasEntered 
             ? 'pt-24 pb-32 md:pb-12 md:pl-[304px] md:pr-10' 
             : 'pt-12 pb-12 items-center'
         }`}>
           <div className="w-full max-w-[1360px] mx-auto">
-            {currentView === 'login' && !isAuthenticated ? (
-              <LoginView onLoginSuccess={handleLoginSuccess} />
+            {!hasEntered ? (
+              <WelcomeView onEnter={() => { setHasEntered(true); setCurrentView('dashboard'); }} />
             ) : currentView === 'dashboard' ? (
               <DashboardView 
                 transactions={transactions} 
@@ -371,13 +326,20 @@ export default function App() {
               />
             ) : (
               // Fallback just-in-case
-              <LoginView onLoginSuccess={handleLoginSuccess} />
+              <DashboardView 
+                transactions={transactions} 
+                binCapacities={binCapacities}
+                onTriggerWasteSim={simulateFullInput}
+                ipUrl={ipUrl}
+                onUpdateIpUrl={handleUpdateIpUrl}
+                balance={balance}
+              />
             )}
           </div>
         </main>
 
         {/* Bottom Bar Responsive Navigation (Mobile Screen size only) */}
-        {isAuthenticated && (
+        {hasEntered && (
           <nav className="fixed bottom-0 left-0 w-full z-50 md:hidden bg-[#0C0F14]/95 backdrop-blur-lg border-t border-white/10 flex justify-around items-center h-16 shadow-[0_-4px_20px_rgba(0,0,0,0.5)]">
             <button 
               onClick={() => setCurrentView('dashboard')}
@@ -407,11 +369,11 @@ export default function App() {
               <span className="text-[10px] uppercase font-bold tracking-wider mt-1 font-headline">Bins</span>
             </button>
             <button 
-              onClick={handleLogout}
+              onClick={handleExitDashboard}
               className="flex flex-col items-center justify-center p-2 text-on-surface-variant hover:text-error transition-transform active:scale-90 outline-none"
             >
               <LogIn className="w-5 h-5" />
-              <span className="text-[10px] uppercase font-bold tracking-wider mt-1 font-headline">Lock</span>
+              <span className="text-[10px] uppercase font-bold tracking-wider mt-1 font-headline">Exit</span>
             </button>
           </nav>
         )}
