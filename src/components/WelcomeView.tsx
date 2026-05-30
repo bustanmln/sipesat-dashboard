@@ -28,10 +28,10 @@ export default function WelcomeView({ onEnter }: WelcomeViewProps) {
             <div className="absolute inset-0 bg-primary-container/10 rounded-full blur-3xl scale-150 animate-pulse"></div>
             
             {/* SIPESAT Logo */}
-            <div className="relative group">
+            <div className="relative group flex items-center justify-center">
               <img 
                 alt="SIPESAT Logo" 
-                className="w-24 h-24 object-contain drop-shadow-[0_0_20px_rgba(74,222,128,0.45)] relative z-10 transition-transform duration-300 group-hover:scale-105" 
+                className="h-20 md:h-24 w-auto object-contain drop-shadow-[0_0_20px_rgba(74,222,128,0.45)] relative z-10 transition-transform duration-300 group-hover:scale-105" 
                 src={`${(import.meta as any).env.BASE_URL}logo-sipesat.png`}
                 referrerPolicy="no-referrer"
               />
@@ -41,10 +41,10 @@ export default function WelcomeView({ onEnter }: WelcomeViewProps) {
             <div className="h-12 w-[1px] bg-white/20 relative z-10"></div>
             
             {/* FTE Logo */}
-            <div className="relative group">
+            <div className="relative group flex items-center justify-center">
               <img 
                 alt="Fakultas Teknik Elektro Logo" 
-                className="w-24 h-24 object-contain drop-shadow-[0_0_20px_rgba(255,255,255,0.15)] relative z-10 transition-transform duration-300 group-hover:scale-105" 
+                className="h-20 md:h-24 w-auto object-contain drop-shadow-[0_0_20px_rgba(255,255,255,0.15)] relative z-10 transition-transform duration-300 group-hover:scale-105" 
                 src={`${(import.meta as any).env.BASE_URL}fte.png`}
                 referrerPolicy="no-referrer"
               />
@@ -90,7 +90,7 @@ export default function WelcomeView({ onEnter }: WelcomeViewProps) {
             <div key={index} className="group relative">
               <img 
                 alt={lab.name} 
-                className="h-12 md:h-16 w-auto object-contain opacity-55 hover:opacity-100 transition-all duration-300 filter grayscale hover:grayscale-0 drop-shadow-[0_0_8px_rgba(255,255,255,0.05)] hover:scale-105" 
+                className="h-16 md:h-24 w-auto object-contain opacity-55 hover:opacity-100 transition-all duration-300 filter grayscale hover:grayscale-0 drop-shadow-[0_0_8px_rgba(255,255,255,0.05)] hover:scale-105" 
                 src={`${(import.meta as any).env.BASE_URL}${lab.file}`}
                 referrerPolicy="no-referrer"
               />
