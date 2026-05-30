@@ -296,9 +296,9 @@ export default function App() {
         )}
 
         {/* Content viewport panel with transition wrapper */}
-        <main className={`flex-1 flex flex-col px-4 sm:px-6 md:py-6 ${
+        <main className={`flex-1 flex flex-col px-4 sm:px-6 ${
           hasEntered 
-            ? 'justify-start pt-24 pb-32 md:pb-12 md:pl-[304px] md:pr-10' 
+            ? 'justify-start pt-24 pb-32 md:pt-28 md:pb-12 md:pl-[304px] md:pr-10' 
             : 'justify-center pt-12 pb-12 items-center'
         }`}>
           <div className="w-full max-w-[1360px] mx-auto">
