@@ -69,6 +69,106 @@ export default function AnalyticsView({ binCapacities }: AnalyticsViewProps) {
     }, 1500);
   };
 
+  const getAIEvaluation = () => {
+    if (totalCount === 0) {
+      return (
+        <>
+          Belum ada aktivitas pemilahan aktif terdeteksi. Silakan gunakan simulator pada menu <span className="text-primary-fixed-dim font-semibold">Devices</span> atau masukkan sampah fisik ke dalam mesin SIPESAT untuk melihat analisis evaluasi cerdas AI secara real-time.
+        </>
+      );
+    }
+    
+    if (totalCount < 15) {
+      return (
+        <>
+          Sistem SIPESAT mendeteksi aktivitas awal dengan total <span className="text-primary-fixed-dim font-extrabold bg-primary/10 px-1.5 py-0.5 rounded">{totalCount} item</span> tersortir. 
+          Rekomendasi AI: Fokuskan setoran awal pada jenis <span className="text-primary-fixed-dim font-semibold">Baterai Bekas</span> jika ada, karena memisahkannya sejak dini sangat efektif mencegah pencemaran zat kimia B3 ke tanah sekitar Anda.
+        </>
+      );
+    }
+    
+    if (totalCount < 50) {
+      // Tier 2: Low-Medium
+      switch(dominantBin.id) {
+        case 'battery':
+          return (
+            <>
+              Pemilahan <span className="text-primary-fixed-dim font-extrabold bg-primary/10 px-1.5 py-0.5 rounded">Baterai</span> mendominasi setoran Anda ({dominantBin.currentCount} pcs). 
+              Ini sangat luar biasa karena memilah baterai secara khusus mencegah zat asam korosif merusak lingkungan. Cobalah untuk mulai menyetor kategori <span className="text-secondary font-semibold">{secondaryBin.id === 'battery' ? 'Botol Kecil' : secondaryBin.name}</span> guna menyeimbangkan siklus daur ulang harian Anda.
+            </>
+          );
+        case 'atk':
+          return (
+            <>
+              Pemilahan <span className="text-primary-fixed-dim font-extrabold bg-primary/10 px-1.5 py-0.5 rounded">ATK</span> menjadi kontributor utama ({dominantBin.currentCount} pcs). 
+              Langkah yang bagus untuk merapikan limbah plastik/kertas perkantoran. Tips AI: Pastikan pulpen atau spidol bekas yang dibuang sudah benar-benar kosong tanpa sisa tinta basah demi menjaga kebersihan penampung fisik mesin.
+            </>
+          );
+        case 'box':
+          return (
+            <>
+              Volume pemilahan <span className="text-primary-fixed-dim font-extrabold bg-primary/10 px-1.5 py-0.5 rounded">Kemasan Kotak</span> meningkat ({dominantBin.currentCount} pcs). 
+              Ini membantu menyelamatkan serat kayu hutan! Tips AI: Lipat kemasan kotak hingga pipih sebelum dimasukkan ke mesin agar hemat volume penampungan hingga 60%.
+            </>
+          );
+        case 'bottle':
+          default:
+          return (
+            <>
+              Setoran <span className="text-primary-fixed-dim font-extrabold bg-primary/10 px-1.5 py-0.5 rounded">Botol Plastik</span> mendominasi aktivitas Anda ({dominantBin.currentCount} pcs). 
+              Sangat baik untuk mempercepat pasokan industri daur ulang PET. AI menyarankan: Kosongkan sisa cairan dalam botol terlebih dahulu agar berat timbangan sampah terbaca akurat oleh sensor presisi mesin.
+            </>
+          );
+      }
+    }
+    
+    if (totalCount < 150) {
+      // Tier 3: Medium-High
+      const treesSaved = (totalCount * 0.05).toFixed(1);
+      switch(dominantBin.id) {
+        case 'battery':
+          return (
+            <>
+              Milestone Menengah Tercapai! Anda telah memilah <span className="text-primary-fixed-dim font-extrabold bg-primary/10 px-1.5 py-0.5 rounded">{dominantBin.currentCount} Baterai</span>. 
+              Tindakan ini setara dengan mengamankan ribuan liter air tanah dari pencemaran merkuri. Sistem menyarankan untuk berkoordinasi dengan petugas kebersihan untuk pengiriman berkala ke TPS B3 terdekat karena volume baterai sudah optimum.
+            </>
+          );
+        case 'atk':
+          return (
+            <>
+              Pemilahan kategori <span className="text-primary-fixed-dim font-extrabold bg-primary/10 px-1.5 py-0.5 rounded">ATK</span> mencapai tingkat menengah ({dominantBin.currentCount} pcs). 
+              Langkah ini berkontribusi signifikan pada pengurangan sampah plastik keras. Rekomendasi: Sebarkan kampanye pemilahan ini ke area kerja atau kelas Anda untuk meningkatkan partisipasi sebesar 40%.
+            </>
+          );
+        case 'box':
+          return (
+            <>
+              Kemasan Kotak terkumpul sebanyak <span className="text-primary-fixed-dim font-extrabold bg-primary/10 px-1.5 py-0.5 rounded">{dominantBin.currentCount} unit</span>. 
+              Anda telah menyelamatkan setara dengan <span className="font-bold text-white">{treesSaved} pohon dewasa</span> dari penebangan! Terus tingkatkan setoran kertas dan kardus untuk mendorong program kampus/kantor hijau yang berkelanjutan.
+            </>
+          );
+        case 'bottle':
+          default:
+          return (
+            <>
+              Pemilahan <span className="text-primary-fixed-dim font-extrabold bg-primary/10 px-1.5 py-0.5 rounded">Botol Plastik</span> berjalan sangat produktif ({dominantBin.currentCount} pcs). 
+              Energi yang dihemat dari pemilahan ini setara dengan menyalakan komputer selama puluhan jam. Pertahankan konsistensi ini untuk mencapai target pemulihan plastik bulanan Anda!
+            </>
+          );
+      }
+    }
+
+    // Tier 4: High / Professional (> 150 items)
+    const treesTotal = Math.round(totalCount * 0.08);
+    return (
+      <>
+        Status Pemilahan: **Level Industrial** (Total: <span className="text-primary-fixed-dim font-black">{totalCount} item</span>). 
+        Kontribusi terbesar berasal dari **{dominantBin.name}** ({dominantBin.currentCount} pcs). Dengan pencapaian ini, Anda telah menyerap emisi karbon setara dengan merawat **{treesTotal} pohon dewasa** selama satu tahun penuh. 
+        Sistem menyarankan untuk mengunduh laporan PDF di pojok kanan atas untuk digunakan sebagai bukti audit keberlanjutan (*Sustainability Audit Report*).
+      </>
+    );
+  };
+
   // Dynamic trends based on total counts
   const recyclingRate = totalCount > 0 ? (24.5 + (totalCount * 0.2)).toFixed(1) : "24.5";
   const co2Offset = totalCount > 0 ? (1240 + (totalCount * 1.5)).toFixed(0) : "1240";
@@ -219,16 +319,7 @@ export default function AnalyticsView({ binCapacities }: AnalyticsViewProps) {
             </div>
 
             <p className="font-sans text-[15px] leading-relaxed text-on-surface">
-              {totalCount > 0 ? (
-                <>
-                  Bulan ini sistem dominan menyortir <span className="text-primary-fixed-dim font-extrabold bg-primary/10 px-1.5 py-0.5 rounded">{dominantBin.name}</span> dengan jumlah total <span className="font-bold">{dominantBin.currentCount} unit</span>. 
-                  Luar biasa, Anda telah mengoptimalkan pembuangan jenis limbah ini! Coba dorong pemilahan kategori <span className="text-secondary font-semibold">{secondaryBin.name}</span> untuk meningkatkan efisiensi sirkular secara keseluruhan.
-                </>
-              ) : (
-                <>
-                  Belum ada data pemilahan aktif terdeteksi. Silakan aktifkan mesin SIPESAT atau gunakan simulator pada menu <span className="text-primary-fixed-dim font-semibold">Devices</span> untuk memulai pencatatan dan evaluasi AI.
-                </>
-              )}
+              {getAIEvaluation()}
             </p>
 
             <div className="flex items-center gap-4 pt-5 mt-5 border-t border-white/10">
