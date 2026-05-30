@@ -235,8 +235,8 @@ export default function DevicesView({
             <div className="aspect-square w-full bg-surface-dim relative overflow-hidden select-none">
               <img 
                 alt="SIPESAT-X1 Hardware" 
-                className="w-full h-full object-cover opacity-60 mix-blend-luminosity group-hover:scale-105 transition-transform duration-700" 
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBXqPsmc5rJ7lzd-FeYduwXzveXVDZTwgNj__-Ro3ZoMtPMai4LK9iX-XZBJFE7V3zLWHmMBpCvRTvK3dVp-wIpLAyl1MI5rEhUKHZVe5tMK684B4YL1NbXTYlNcugG6KXO9qcx6ox2NOVI_3Pbm35xQsbZtAS3MBi_SeAAUJeqKroI2KBf88yP-tmvG48cXUzH24ubuddgE6y9NapWH6_8wa7GLhoo2An-_c_2G39d5wGDsJ4N9-VONEcoJbrVrnFmuzT8cJDCn2Au"
+                className="w-full h-full object-cover opacity-90 group-hover:scale-105 transition-transform duration-700" 
+                src={`${(import.meta as any).env.BASE_URL}alatsipesat.jpeg`}
                 referrerPolicy="no-referrer"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#141824] via-transparent to-transparent"></div>
