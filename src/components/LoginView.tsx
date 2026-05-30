@@ -14,6 +14,7 @@ interface LoginViewProps {
 }
 
 export default function LoginView({ onLoginSuccess }: LoginViewProps) {
+  const sipesatLogo = "/logo-sipesat.png";
   const [isSignUp, setIsSignUp] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
