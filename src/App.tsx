@@ -129,7 +129,7 @@ export default function App() {
       percentage: 45,
       maxVolume: 40,
       currentCount: 18,
-      colorHex: '#4ADE80',
+      colorHex: '#1f995c',
     },
     {
       id: 'atk',
@@ -150,7 +150,7 @@ export default function App() {
       percentage: 20,
       maxVolume: 50,
       currentCount: 10,
-      colorHex: '#3B82F6',
+      colorHex: '#2577b1',
     },
     {
       id: 'bottle',
@@ -160,7 +160,7 @@ export default function App() {
       percentage: 60,
       maxVolume: 80,
       currentCount: 48,
-      colorHex: '#FACC15', // Set to yellow to match Analytics Donut chart colors
+      colorHex: '#f3bb34', // Set to yellow to match Analytics Donut chart colors
     },
   ]);
 
@@ -252,11 +252,11 @@ export default function App() {
       </div>
 
       {/* Embedded grid mesh background decoration */}
-      <div className="fixed inset-0 z-[-1] opacity-[0.06] pointer-events-none" style={{ backgroundImage: 'radial-gradient(#4ade80 0.5px, transparent 0.5px)', backgroundSize: '32px 32px' }}></div>
+      <div className="fixed inset-0 z-[-1] opacity-[0.06] pointer-events-none" style={{ backgroundImage: 'radial-gradient(#1f995c 0.5px, transparent 0.5px)', backgroundSize: '32px 32px' }}></div>
 
       {/* Floating active deposit simulation toast */}
       {alertToast && (
-        <div className="fixed bottom-20 left-1/2 -translate-x-1/2 md:bottom-6 md:left-auto md:right-6 md:translate-x-0 z-[100] max-w-sm w-full p-4 rounded-xl bg-[#141824] border border-[#4ade80]/40 text-on-surface flex items-center gap-3 shadow-[0_0_20px_rgba(74,222,128,0.15)] animate-in slide-in-from-bottom-2 duration-300">
+        <div className="fixed bottom-20 left-1/2 -translate-x-1/2 md:bottom-6 md:left-auto md:right-6 md:translate-x-0 z-[100] max-w-sm w-full p-4 rounded-xl bg-[#141824] border border-[#1f995c]/40 text-on-surface flex items-center gap-3 shadow-[0_0_20px_rgba(31,153,92,0.15)] animate-in slide-in-from-bottom-2 duration-300">
           <div className="w-8 h-8 rounded-full bg-primary-fixed-dim/15 flex items-center justify-center shrink-0">
             <Sparkles className="w-4.5 h-4.5 text-primary-fixed-dim" />
           </div>

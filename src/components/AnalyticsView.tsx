@@ -179,7 +179,7 @@ export default function AnalyticsView({ binCapacities }: AnalyticsViewProps) {
       
       {/* Toast notification */}
       {successToast && (
-        <div className="fixed top-20 right-6 z-[100] p-4 rounded-xl bg-primary-fixed-dim text-on-primary-fixed font-headline font-bold flex items-center gap-2 shadow-[0_0_20px_rgba(42,229,0,0.4)] animate-bounce">
+        <div className="fixed top-20 right-6 z-[100] p-4 rounded-xl bg-primary-fixed-dim text-on-primary-fixed font-headline font-bold flex items-center gap-2 shadow-[0_0_20px_rgba(31,153,92,0.4)] animate-bounce">
           <Sparkles className="w-4 h-4" />
           <span>Ecosystem PDF Report exported successfully!</span>
         </div>
@@ -356,7 +356,7 @@ export default function AnalyticsView({ binCapacities }: AnalyticsViewProps) {
                     </span>
                   </div>
                   <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded ${
-                    node.status === 'ONLINE' ? 'bg-[#2ae500]/10 text-[#2ae500]' : 'bg-[#00eefc]/10 text-[#00eefc]'
+                    node.status === 'ONLINE' ? 'bg-primary/10 text-primary' : 'bg-secondary/10 text-secondary'
                   }`}>
                     {node.status}
                   </span>
@@ -382,8 +382,8 @@ export default function AnalyticsView({ binCapacities }: AnalyticsViewProps) {
           </div>
           <div className="h-12 w-full mt-4 bg-primary/5 rounded-lg relative overflow-hidden">
             <svg className="w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 20">
-              <path className="text-[#4ade80]/30" d="M0 20 L0 15 Q25 5 50 12 T100 5 L100 20 Z" fill="currentColor"></path>
-              <path className="text-[#4ade80]/50" d="M0 20 L0 17 Q25 8 50 14 T100 8 L100 20 Z" fill="currentColor"></path>
+              <path className="text-[#1f995c]/30" d="M0 20 L0 15 Q25 5 50 12 T100 5 L100 20 Z" fill="currentColor"></path>
+              <path className="text-[#1f995c]/50" d="M0 20 L0 17 Q25 8 50 14 T100 8 L100 20 Z" fill="currentColor"></path>
             </svg>
           </div>
         </div>
@@ -400,8 +400,8 @@ export default function AnalyticsView({ binCapacities }: AnalyticsViewProps) {
           </div>
           <div className="h-12 w-full mt-4 bg-secondary-container/5 rounded-lg relative overflow-hidden">
             <svg className="w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 20">
-              <path className="text-[#3b82f6]/20" d="M0 20 L0 18 Q20 10 40 15 T80 5 T100 8 L100 20 Z" fill="currentColor"></path>
-              <path className="text-[#3b82f6]/45" d="M0 20 L0 19 Q20 12 40 16 T80 8 T100 11 L100 20 Z" fill="currentColor"></path>
+              <path className="text-[#2577b1]/20" d="M0 20 L0 18 Q20 10 40 15 T80 5 T100 8 L100 20 Z" fill="currentColor"></path>
+              <path className="text-[#2577b1]/45" d="M0 20 L0 19 Q20 12 40 16 T80 8 T100 11 L100 20 Z" fill="currentColor"></path>
             </svg>
           </div>
         </div>

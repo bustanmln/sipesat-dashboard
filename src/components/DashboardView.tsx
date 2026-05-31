@@ -164,7 +164,7 @@ export default function DashboardView({
             <div className="flex items-center gap-1.5 bg-black/40 px-2 py-0.5 rounded border border-white/5">
               <span className={`w-2 h-2 rounded-full ${
                 detectionState.status === 'scanning' 
-                  ? 'bg-[#facc15] animate-pulse' 
+                  ? 'bg-[#f3bb34] animate-pulse' 
                   : detectionState.status === 'detected' 
                     ? 'bg-primary-fixed-dim pulse-dot' 
                     : 'bg-red-500 animate-pulse'
@@ -180,7 +180,7 @@ export default function DashboardView({
             {cameraMode === 'simulation' ? (
               <div className="absolute inset-0 w-full h-full flex flex-col justify-center items-center overflow-hidden">
                 {detectionState.status === 'scanning' && (
-                  <div className="absolute left-0 w-full h-[2px] bg-primary-fixed-dim/80 shadow-[0_0_8px_#4ade80] animate-scan z-20"></div>
+                  <div className="absolute left-0 w-full h-[2px] bg-primary-fixed-dim/80 shadow-[0_0_8px_#1f995c] animate-scan z-20"></div>
                 )}
                 
                 <div className="w-full h-full relative">
@@ -351,7 +351,7 @@ export default function DashboardView({
                 {cameraMode === 'ip' ? (
                   <button
                     onClick={() => setIsEditingIp(true)}
-                    className="p-1 px-2 text-[10px] font-semibold text-secondary-fixed-dim hover:text-white bg-[#00dbe9]/10 rounded border border-[#00dbe9]/20 flex items-center gap-1 transition-all"
+                    className="p-1 px-2 text-[10px] font-semibold text-secondary-fixed-dim hover:text-white bg-secondary/10 rounded border border-secondary/20 flex items-center gap-1 transition-all"
                   >
                     <Settings className="w-3 h-3" />
                     Configure IP
@@ -384,7 +384,7 @@ export default function DashboardView({
                   <div className={`${bgLight} p-2 rounded-lg`}>
                     <Icon className={`w-5 h-5 ${borderColors}`} />
                   </div>
-                  <span className="text-[10px] font-bold tracking-widest text-[#2ae500]/80 lowercase bg-[#2ae500]/10 px-2 py-0.5 rounded flex items-center gap-1">
+                  <span className="text-[10px] font-bold tracking-widest text-primary lowercase bg-primary/10 px-2 py-0.5 rounded flex items-center gap-1">
                     <span className="w-1.5 h-1.5 bg-primary-fixed-dim rounded-full pulse-dot"></span>
                     sync
                   </span>
@@ -475,14 +475,14 @@ export default function DashboardView({
                 </div>
                 <div className="flex justify-between items-center text-sm pb-2">
                   <span className="text-white/60 font-medium font-sans">Cloud API</span>
-                  <span className="text-[#FACC15] font-bold">Latency +12ms</span>
+                  <span className="text-[#f3bb34] font-bold">Latency +12ms</span>
                 </div>
               </div>
             </div>
             
             <div className="pt-4 mt-6 border-t border-white/5 flex gap-2">
-              <div className="flex-1 h-1 bg-[#4ADE80] rounded-full pulse-dot"></div>
-              <div className="flex-1 h-1 bg-[#4ADE80] rounded-full"></div>
+              <div className="flex-1 h-1 bg-[#1f995c] rounded-full pulse-dot"></div>
+              <div className="flex-1 h-1 bg-[#1f995c] rounded-full"></div>
               <div className="flex-1 h-1 bg-white/10 rounded-full"></div>
             </div>
           </div>

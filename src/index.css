@@ -1,6 +1,6 @@
-@import "tailwindcss";
-
 @import url('https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Inter:wght@100..900&display=swap');
+
+@import "tailwindcss";
 
 @theme {
   --color-background: #0C0F14;
@@ -19,20 +19,20 @@
   --color-inverse-surface: #E2E8F0;
   --color-inverse-on-surface: #0f131a;
   
-  --color-primary-fixed-dim: #4ADE80;
-  --color-primary-container: #4ADE80;
-  --color-primary: #86EFAC;
-  --color-on-primary: #052e16;
+  --color-primary-fixed-dim: #1f995c;
+  --color-primary-container: #1f995c;
+  --color-primary: #7ee0ad;
+  --color-on-primary: #022512;
   
-  --color-secondary-container: #3B82F6;
-  --color-secondary: #93C5FD;
-  --color-on-secondary: #00224d;
-  --color-secondary-fixed-dim: #3B82F6;
+  --color-secondary-container: #2577b1;
+  --color-secondary: #93cef1;
+  --color-on-secondary: #031e30;
+  --color-secondary-fixed-dim: #2577b1;
   
-  --color-tertiary-container: #ff9d00;
-  --color-tertiary: #FFE4E6;
-  --color-on-tertiary-container: #4c0519;
-  --color-tertiary-fixed-dim: #FACC15;
+  --color-tertiary-container: #f3bb34;
+  --color-tertiary: #fee5a9;
+  --color-on-tertiary-container: #3d2b02;
+  --color-tertiary-fixed-dim: #f3bb34;
   
   --color-error: #F87171;
   --color-error-container: #7f1d1d;
@@ -57,26 +57,26 @@
 }
 
 @utility card-gradient {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(74, 222, 128, 0.08) 100%);
+  background: linear-gradient(135deg, rgba(37, 119, 177, 0.15) 0%, rgba(31, 153, 92, 0.08) 100%);
 }
 
 @utility glow-green {
-  box-shadow: 0 0 20px rgba(74, 222, 128, 0.2);
+  box-shadow: 0 0 20px rgba(31, 153, 92, 0.2);
 }
 
 @utility neon-glow-primary {
-  box-shadow: 0 0 15px rgba(74, 222, 128, 0.25);
+  box-shadow: 0 0 15px rgba(31, 153, 92, 0.25);
 }
 
 @utility neon-glow-primary-hover {
   transition: all 0.3s ease;
   &:hover {
-    box-shadow: 0 0 25px rgba(74, 222, 128, 0.55);
+    box-shadow: 0 0 25px rgba(31, 153, 92, 0.55);
   }
 }
 
 @utility neon-glow-secondary {
-  box-shadow: 0 0 15px rgba(59, 130, 246, 0.25);
+  box-shadow: 0 0 15px rgba(37, 119, 177, 0.25);
 }
 
 @utility font-brand-italic {
@@ -116,10 +116,10 @@
   background: rgba(10, 14, 24, 0.5);
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(42, 229, 0, 0.25);
+  background: rgba(31, 153, 92, 0.25);
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(42, 229, 0, 0.5);
+  background: rgba(31, 153, 92, 0.5);
 }
 

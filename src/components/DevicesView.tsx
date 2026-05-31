@@ -52,7 +52,7 @@ export default function DevicesView({
         <div>
           <div className="flex items-center gap-2 mb-1.5">
             <span className="w-2.5 h-2.5 bg-primary-fixed-dim rounded-full pulse-dot"></span>
-            <span className="text-xs uppercase tracking-widest font-extrabold text-[#2ae500]/90">
+            <span className="text-xs uppercase tracking-widest font-extrabold text-primary">
               Unit #SIPESAT-092 Active Command
             </span>
           </div>
@@ -191,7 +191,7 @@ export default function DevicesView({
                 <h4 className="font-headline text-2xl font-black text-white">2m<span className="text-xs font-normal text-on-surface-variant ml-0.5"> ago</span></h4>
                 <button 
                   onClick={() => alert("Re-syncing with edge networks... Success!")}
-                  className="p-1 px-2.5 text-xs font-bold text-secondary-fixed-dim hover:text-white bg-[#00dbe9]/10 rounded border border-[#00dbe9]/20 flex items-center gap-1 transition-all outline-none md:mb-1 hover:bg-white/10"
+                  className="p-1 px-2.5 text-xs font-bold text-secondary-fixed-dim hover:text-white bg-secondary/10 rounded border border-secondary/20 flex items-center gap-1 transition-all outline-none md:mb-1 hover:bg-white/10"
                 >
                   <RefreshCw className="w-3.5 h-3.5 animate-spin-slow" />
                   Sync
@@ -248,7 +248,7 @@ export default function DevicesView({
                   <span className="text-[9px] font-bold uppercase tracking-wider text-white">Edge AI Enabled</span>
                 </div>
                 <div className="flex items-center gap-2 px-3 py-1 bg-black/50 backdrop-blur-md rounded-full border border-white/10">
-                  <span className="w-1.5 h-1.5 bg-[#00eefc] rounded-full"></span>
+                  <span className="w-1.5 h-1.5 bg-secondary rounded-full"></span>
                   <span className="text-[9px] font-bold uppercase tracking-wider text-white">Cloud Synced</span>
                 </div>
               </div>
