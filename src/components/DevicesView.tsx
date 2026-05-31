@@ -82,12 +82,12 @@ export default function DevicesView({
         <div className="lg:col-span-8 flex flex-col gap-6">
           
           {/* Bin capacities visual cards */}
-          <div className="glass-panel rounded-xl p-6 relative overflow-hidden flex flex-col border border-white/10">
-            <div className="absolute -right-24 -top-24 w-64 h-64 bg-primary-fixed-dim/5 blur-[80px] rounded-full pointer-events-none"></div>
+          <div className="bg-white rounded-xl p-6 relative overflow-hidden flex flex-col border border-slate-200/80 shadow-[0_4px_12px_rgba(0,0,0,0.03)]">
+            <div className="absolute -right-24 -top-24 w-64 h-64 bg-primary-container/10 blur-[80px] rounded-full pointer-events-none"></div>
             
-            <div className="flex justify-between items-center mb-6 pb-4 border-b border-white/5">
+            <div className="flex justify-between items-center mb-6 pb-4 border-b border-slate-100">
               <div>
-                <h3 className="font-headline text-lg font-bold text-white">
+                <h3 className="font-headline text-lg font-bold text-slate-800">
                   Kapasitas Tempat Sampah
                 </h3>
                 <p className="text-[11px] text-on-surface-variant tracking-wider uppercase font-semibold">
@@ -106,7 +106,7 @@ export default function DevicesView({
                   <div key={bin.id} className="space-y-2">
                     <div className="flex justify-between items-center text-xs">
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-bold text-white uppercase tracking-wider font-headline">
+                        <span className="text-sm font-black text-slate-800 uppercase tracking-wider font-headline">
                           {bin.name}
                         </span>
                         {isOverThreshold && (
@@ -126,7 +126,7 @@ export default function DevicesView({
                     </div>
 
                     {/* Progress Bar Track */}
-                    <div className="h-3 w-full bg-surface-container-highest rounded-full overflow-hidden border border-white/5 relative">
+                    <div className="h-3 w-full bg-slate-100 rounded-full overflow-hidden border border-slate-200/50 relative">
                       <div 
                         className="h-full rounded-full transition-all duration-1000"
                         style={{ 
@@ -157,41 +157,41 @@ export default function DevicesView({
 
           {/* Quick Metrics display bar */}
           <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-            <div className="glass-panel bg-surface-container-low/40 rounded-xl p-5 border border-white/5">
+            <div className="bg-white rounded-xl p-5 border border-slate-200/80 shadow-[0_4px_12px_rgba(0,0,0,0.03)]">
               <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest font-headline mb-1">
                 Sorted Today
               </p>
               <div className="flex items-end justify-between">
-                <h4 className="font-headline text-2xl font-black text-white">{sortedToday}</h4>
-                <span className="text-primary-fixed-dim text-xs font-bold font-headline bg-primary-fixed-dim/10 px-1.5 py-0.5 rounded">
+                <h4 className="font-headline text-2xl font-black text-slate-800">{sortedToday}</h4>
+                <span className="text-primary-fixed-dim text-xs font-bold font-headline bg-primary-container px-1.5 py-0.5 rounded">
                   +12% ↑
                 </span>
               </div>
             </div>
 
-            <div className="glass-panel bg-surface-container-low/40 rounded-xl p-5 border border-white/5">
+            <div className="bg-white rounded-xl p-5 border border-slate-200/80 shadow-[0_4px_12px_rgba(0,0,0,0.03)]">
               <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest font-headline mb-1">
                 Uptime
               </p>
               <div className="flex items-end justify-between">
-                <h4 className="font-headline text-2xl font-black text-white">
+                <h4 className="font-headline text-2xl font-black text-slate-800">
                   {uptime}<span className="text-xs font-normal text-on-surface-variant ml-0.5">%</span>
                 </h4>
-                <span className="text-primary-fixed-dim text-[10px] font-bold bg-primary-fixed-dim/10 px-2 py-0.5 rounded">
+                <span className="text-primary-fixed-dim text-[10px] font-bold bg-primary-container px-2 py-0.5 rounded">
                   Opt.
                 </span>
               </div>
             </div>
 
-            <div className="glass-panel bg-surface-container-low/40 rounded-xl p-5 border border-white/5 col-span-2 md:col-span-1">
+            <div className="bg-white rounded-xl p-5 border border-slate-200/80 shadow-[0_4px_12px_rgba(0,0,0,0.03)] col-span-2 md:col-span-1">
               <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest font-headline mb-1">
                 Last Sync
               </p>
               <div className="flex items-end justify-between">
-                <h4 className="font-headline text-2xl font-black text-white">2m<span className="text-xs font-normal text-on-surface-variant ml-0.5"> ago</span></h4>
+                <h4 className="font-headline text-2xl font-black text-slate-800">2m<span className="text-xs font-normal text-on-surface-variant ml-0.5"> ago</span></h4>
                 <button 
                   onClick={() => alert("Re-syncing with edge networks... Success!")}
-                  className="p-1 px-2.5 text-xs font-bold text-secondary-fixed-dim hover:text-white bg-secondary/10 rounded border border-secondary/20 flex items-center gap-1 transition-all outline-none md:mb-1 hover:bg-white/10"
+                  className="p-1 px-2.5 text-xs font-bold text-[#2577b1] hover:text-[#1d5c8a] bg-secondary-container rounded border border-secondary/20 flex items-center gap-1 transition-all outline-none md:mb-1 hover:bg-secondary/15"
                 >
                   <RefreshCw className="w-3.5 h-3.5 animate-spin-slow" />
                   Sync
@@ -201,12 +201,12 @@ export default function DevicesView({
           </div>
 
           {/* Interactive Live simulator panel */}
-          <div className="glass-panel rounded-xl p-5 border border-primary/20 bg-primary/5">
-            <h4 className="font-headline text-sm font-bold text-white mb-2 flex items-center gap-1.5">
+          <div className="bg-[#e6f4ea] rounded-xl p-5 border border-[#1f995c]/20">
+            <h4 className="font-headline text-sm font-bold text-[#166534] mb-2 flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-primary-fixed-dim pulse-dot"></span>
               Live Garbage Simulator (Interact Here)
             </h4>
-            <p className="text-xs text-on-surface-variant mb-4">
+            <p className="text-xs text-slate-600 mb-4 font-medium">
               Pilih item berkategori di bawah untuk mensimulasikan pemilahan sampah fisik di mesin. Sensor Edge AI akan mengidentifikasi jenis sampah, mengupdate level tempat sampah, dan menyalurkan insentif ke saldo Anda.
             </p>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -214,7 +214,7 @@ export default function DevicesView({
                 <button
                   key={b.id}
                   onClick={() => onDepositSimulate(b.id)}
-                  className="py-3 px-3 rounded-lg border text-left bg-[#141824] border-white/10 hover:border-primary-fixed-dim hover:bg-white/5 transition-all text-xs"
+                  className="py-3 px-3 rounded-lg border text-left bg-white border-slate-200/80 hover:border-primary-fixed-dim hover:bg-slate-50 transition-all text-xs"
                 >
                   <div className="flex justify-between items-center mb-1">
                     <span className="uppercase text-[9px] font-black text-on-surface-variant">{b.id}</span>
@@ -231,15 +231,15 @@ export default function DevicesView({
         <div className="lg:col-span-4 flex flex-col gap-6">
           
           {/* Physical specs visual glass card */}
-          <div className="glass-panel bg-surface-container-high/60 border border-white/10 rounded-xl overflow-hidden relative group">
-            <div className="aspect-square w-full bg-surface-dim relative overflow-hidden select-none">
+          <div className="bg-white border border-slate-200/80 rounded-xl overflow-hidden relative group shadow-[0_4px_12px_rgba(0,0,0,0.03)]">
+            <div className="aspect-square w-full bg-slate-100 relative overflow-hidden select-none">
               <img 
                 alt="SIPESAT-X1 Hardware" 
                 className="w-full h-full object-cover opacity-90 group-hover:scale-105 transition-transform duration-700" 
                 src={`${(import.meta as any).env.BASE_URL}alatsipesat.jpeg`}
                 referrerPolicy="no-referrer"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#141824] via-transparent to-transparent"></div>
+              <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent"></div>
               
               {/* Overlapping IoT chips */}
               <div className="absolute top-4 left-4 flex flex-col gap-2">
@@ -255,22 +255,22 @@ export default function DevicesView({
             </div>
 
             <div className="p-6">
-              <h3 className="font-headline text-lg font-black text-white mb-3">
+              <h3 className="font-headline text-lg font-black text-slate-800 mb-3">
                 <span className="text-primary-fixed-dim text-brand-italic mr-1.5">SIPESAT</span>Unit Details
               </h3>
 
-              <div className="space-y-2.5">
-                <div className="flex justify-between border-b border-white/5 pb-2">
-                  <span className="text-xs text-on-surface-variant">Model ID</span>
-                  <span className="text-xs text-white font-bold">SIPESAT-X1 Edge</span>
+              <div className="space-y-2.5 text-slate-700">
+                <div className="flex justify-between border-b border-slate-100 pb-2">
+                  <span className="text-xs text-on-surface-variant font-semibold">Model ID</span>
+                  <span className="text-xs text-slate-800 font-bold">SIPESAT-X1 Edge</span>
                 </div>
-                <div className="flex justify-between border-b border-white/5 pb-2">
-                  <span className="text-xs text-on-surface-variant">Location</span>
-                  <span className="text-xs text-white font-bold">Main Hallway A</span>
+                <div className="flex justify-between border-b border-slate-100 pb-2">
+                  <span className="text-xs text-on-surface-variant font-semibold">Location</span>
+                  <span className="text-xs text-slate-800 font-bold">Main Hallway A</span>
                 </div>
                 <div className="flex justify-between pb-1">
-                  <span className="text-xs text-on-surface-variant">Firmware</span>
-                  <span className="text-xs text-white font-bold">v2.4.1-stable</span>
+                  <span className="text-xs text-on-surface-variant font-semibold">Firmware</span>
+                  <span className="text-xs text-slate-800 font-bold">v2.4.1-stable</span>
                 </div>
               </div>
 
@@ -286,7 +286,7 @@ export default function DevicesView({
           </div>
 
           {/* System Health visual track gauge */}
-          <div className="glass-panel bg-surface-container-low/60 border border-white/10 rounded-xl p-5">
+          <div className="bg-white border border-slate-200/80 rounded-xl p-5 shadow-[0_4px_12px_rgba(0,0,0,0.03)]">
             <h4 className="text-xs font-bold mb-3 flex items-center gap-2 text-primary font-headline uppercase tracking-[0.05em]">
               <Zap className="w-4.5 h-4.5 text-primary-fixed-dim" />
               Machine Hardware Health
@@ -302,7 +302,7 @@ export default function DevicesView({
               <div className="h-full w-full bg-primary/25 rounded-full"></div>
             </div>
 
-            <p className="text-[11px] text-on-surface-variant leading-relaxed opacity-85 font-sans">
+            <p className="text-[11px] text-slate-600 leading-relaxed font-semibold font-sans">
               All SIPESAT environmental modules are operating within nominal parameters. 5 of 7 core AI logical sorting layers reported success in the last validation audit cycle.
             </p>
           </div>
@@ -311,26 +311,26 @@ export default function DevicesView({
 
       {/* System configuration overlay modal panel */}
       {showConfigLocal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-300">
-          <div className="glass-panel bg-[#141824] border border-white/10 rounded-2xl p-6 max-w-md w-full relative animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-300">
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 max-w-md w-full relative animate-in zoom-in-95 duration-200 text-slate-800 shadow-2xl">
             <button 
               type="button"
               onClick={() => setShowConfigLocal(false)}
-              className="absolute top-4 right-4 text-on-surface-variant hover:text-white transition-colors"
+              className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 font-bold transition-colors text-lg"
             >
               ×
             </button>
 
-            <h3 className="font-headline text-lg font-bold text-white mb-1.5 flex items-center gap-2">
-              <Settings className="w-5 h-5 text-primary-fixed-dim" />
+            <h3 className="font-headline text-lg font-bold text-slate-900 mb-1.5 flex items-center gap-2">
+              <Settings className="w-5 h-5 text-[#1f995c]" />
               SIPESAT Edge Config Deck
             </h3>
-            <p className="text-xs text-on-surface-variant mb-6 leading-relaxed">
+            <p className="text-xs text-slate-500 mb-6 leading-relaxed">
               Konfigurasi sirkuit dan sensor di IoT unit SIPESAT-092. Pastikan parameter berada di rentang aman.
             </p>
 
             {configSuccess && (
-              <div className="mb-5 p-3 rounded-lg bg-primary-fixed-dim/10 text-primary-fixed-dim border border-primary-fixed-dim/20 text-xs font-semibold flex items-center gap-2">
+              <div className="mb-5 p-3 rounded-lg bg-primary-container text-[#1f995c] border border-primary/20 text-xs font-semibold flex items-center gap-2">
                 <Check className="w-4 h-4" />
                 Parameters updated and burned to EEPROM!
               </div>
@@ -338,7 +338,7 @@ export default function DevicesView({
 
             <form onSubmit={handleConfigSave} className="space-y-4">
               <div>
-                <label className="block text-xs text-on-surface-variant mb-2 font-headline font-semibold">
+                <label className="block text-xs text-slate-500 mb-2 font-headline font-bold">
                   Sensor Scanning Frequency
                 </label>
                 <div className="grid grid-cols-3 gap-2">
@@ -349,8 +349,8 @@ export default function DevicesView({
                       onClick={() => setSelectedSensorFreq(freq)}
                       className={`py-2 px-3 rounded-lg text-xs font-bold font-headline border text-center transition-all ${
                         selectedSensorFreq === freq 
-                          ? 'bg-primary-fixed-dim/10 text-primary-fixed-dim border-primary-fixed-dim' 
-                          : 'bg-white/5 border-white/5 text-on-surface-variant hover:bg-white/10'
+                          ? 'bg-primary-container text-[#1f995c] border-[#1f995c]' 
+                          : 'bg-slate-55 border-slate-100 text-slate-500 hover:bg-slate-100'
                       }`}
                     >
                       {freq}
@@ -360,29 +360,29 @@ export default function DevicesView({
               </div>
 
               <div>
-                <label className="block text-xs text-on-surface-variant mb-1.5 font-headline font-semibold" htmlFor="threshold">
+                <label className="block text-xs text-slate-500 mb-1.5 font-headline font-bold" htmlFor="threshold">
                   Overflow Alert Threshold
                 </label>
                 <input
                   id="threshold"
                   type="text"
                   defaultValue="80%"
-                  className="w-full bg-surface-container border border-white/10 rounded-lg py-2.5 px-3 text-xs text-white"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-lg py-2.5 px-3 text-xs text-slate-800 font-bold"
                 />
               </div>
 
-              <div className="flex gap-4 pt-4 border-t border-white/5">
+              <div className="flex gap-4 pt-4 border-t border-slate-100">
                 <button
                   type="button"
                   onClick={handleRestartNode}
                   disabled={restarting}
-                  className="flex-1 py-3 text-xs font-bold rounded-lg border border-white/10 hover:bg-white/5 hover:text-white text-on-surface-variant transition-all disabled:opacity-50"
+                  className="flex-1 py-3 text-xs font-bold rounded-lg border border-slate-200 hover:bg-slate-50 hover:text-slate-800 text-slate-600 transition-all disabled:opacity-50"
                 >
                   {restarting ? 'Rebooting...' : 'Soft Restart Node'}
                 </button>
                 <button
                   type="submit"
-                  className="flex-1 py-3 text-xs font-headline font-bold text-on-primary bg-primary rounded-lg transition-all"
+                  className="flex-1 py-3 text-xs font-headline font-bold text-on-primary bg-primary rounded-lg transition-all shadow-md"
                 >
                   Save Settings
                 </button>

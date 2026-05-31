@@ -150,13 +150,13 @@ export default function DashboardView({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
         {/* Raspberry Pi 4B Camera Feed Card (Large 7-cols) */}
-        <div className="lg:col-span-7 glass-panel bg-white/3 rounded-xl p-5 border border-white/10 flex flex-col justify-between group overflow-hidden relative min-h-[350px]">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-primary-fixed-dim/5 rounded-full blur-2xl pointer-events-none"></div>
+        <div className="lg:col-span-7 bg-white rounded-xl p-5 border border-slate-200/80 shadow-[0_4px_12px_rgba(0,0,0,0.03)] flex flex-col justify-between group overflow-hidden relative min-h-[350px]">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-primary-container/10 rounded-full blur-2xl pointer-events-none"></div>
           
           <div className="flex justify-between items-center mb-3">
             <div className="flex items-center gap-2">
               <Camera className="w-4 h-4 text-primary-fixed-dim" />
-              <span className="text-xs font-bold tracking-wider text-white uppercase font-headline">
+              <span className="text-xs font-bold tracking-wider text-slate-700 uppercase font-headline">
                 Pi Camera Feed
               </span>
             </div>
@@ -300,7 +300,7 @@ export default function DashboardView({
           </div>
 
           {/* Mode Switch and Settings bar */}
-          <div className="mt-3 pt-3 border-t border-white/5">
+          <div className="mt-3 pt-3 border-t border-slate-100">
             {isEditingIp ? (
               <div className="space-y-2">
                 <label className="block text-[10px] text-on-surface-variant font-bold uppercase tracking-wider">
@@ -311,7 +311,7 @@ export default function DashboardView({
                     type="text"
                     defaultValue={ipUrl}
                     id="camera_ip_input"
-                    className="flex-1 bg-surface-container border border-white/10 rounded-lg py-1 px-2.5 text-xs text-white font-mono"
+                    className="flex-1 bg-slate-50 border border-slate-200 rounded-lg py-1 px-2.5 text-xs text-slate-800 font-mono"
                     placeholder="http://192.168.1.100:8080/stream.mjpg"
                   />
                   <button
@@ -325,7 +325,7 @@ export default function DashboardView({
                   </button>
                   <button
                     onClick={() => setIsEditingIp(false)}
-                    className="px-2.5 bg-white/5 text-white/60 border border-white/10 text-xs rounded-lg"
+                    className="px-2.5 bg-slate-100 text-slate-600 border border-slate-200 text-xs rounded-lg font-bold"
                   >
                     Cancel
                   </button>
@@ -333,16 +333,16 @@ export default function DashboardView({
               </div>
             ) : (
               <div className="flex justify-between items-center text-xs">
-                <div className="flex rounded-lg bg-surface-container-low p-1 border border-white/5">
+                <div className="flex rounded-lg bg-slate-100 p-1 border border-slate-200/50">
                   <button
                     onClick={() => handleCameraModeChange('simulation')}
-                    className={`px-2.5 py-1 text-[10px] font-bold rounded-md font-headline transition-all ${cameraMode === 'simulation' ? 'bg-primary/10 text-primary border border-primary/20' : 'text-on-surface-variant'}`}
+                    className={`px-2.5 py-1 text-[10px] font-bold rounded-md font-headline transition-all ${cameraMode === 'simulation' ? 'bg-white text-primary shadow-sm border border-slate-200/50' : 'text-on-surface-variant'}`}
                   >
                     AI Sim
                   </button>
                   <button
                     onClick={() => handleCameraModeChange('ip')}
-                    className={`px-2.5 py-1 text-[10px] font-bold rounded-md font-headline transition-all ${cameraMode === 'ip' ? 'bg-primary/10 text-primary border border-primary/20' : 'text-on-surface-variant'}`}
+                    className={`px-2.5 py-1 text-[10px] font-bold rounded-md font-headline transition-all ${cameraMode === 'ip' ? 'bg-white text-primary shadow-sm border border-slate-200/50' : 'text-on-surface-variant'}`}
                   >
                     IP Cam
                   </button>
@@ -378,7 +378,7 @@ export default function DashboardView({
             return (
               <div 
                 key={item.id} 
-                className="glass-panel rounded-xl p-4.5 flex flex-col justify-between group hover:border-white/25 transition-all text-left"
+                className="bg-white rounded-xl p-4.5 flex flex-col justify-between group hover:border-slate-300 border border-slate-200/80 shadow-[0_4px_12px_rgba(0,0,0,0.03)] transition-all text-left"
               >
                 <div className="flex justify-between items-start">
                   <div className={`${bgLight} p-2 rounded-lg`}>
@@ -422,14 +422,14 @@ export default function DashboardView({
                 <div
                   key={tx.id}
                   onClick={() => setSelectedTx(tx)}
-                  className="glass-panel hover:bg-white/5 cursor-pointer rounded-xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all duration-300 group border border-white/5 hover:border-white/15"
+                  className="bg-white hover:bg-slate-50 cursor-pointer rounded-xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all duration-300 group border border-slate-200/80 hover:border-slate-350 shadow-[0_2px_8px_rgba(0,0,0,0.02)]"
                 >
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-full bg-surface-container-highest/60 border border-white/5 flex items-center justify-center shrink-0">
+                    <div className="w-12 h-12 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0">
                       <TxIcon className={`w-5 h-5 ${activeConfig.color}`} />
                     </div>
                     <div>
-                      <h4 className="font-headline text-[15px] font-bold text-white group-hover:text-primary transition-colors">
+                      <h4 className="font-headline text-[15px] font-bold text-slate-800 group-hover:text-primary transition-colors">
                         {tx.title}
                       </h4>
                       <p className="text-[11px] text-on-surface-variant flex items-center gap-1.5 mt-0.5 font-mono">
@@ -440,7 +440,7 @@ export default function DashboardView({
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between md:justify-end gap-6 border-t md:border-none border-white/5 pt-3 md:pt-0">
+                  <div className="flex items-center justify-between md:justify-end gap-6 border-t md:border-none border-slate-100 pt-3 md:pt-0">
                     <div className="text-left md:text-right">
                       <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-primary/10 text-primary border border-primary/20 mt-1">
                         {tx.status}
@@ -459,31 +459,31 @@ export default function DashboardView({
           
 
           {/* System Health Card */}
-          <div className="glass-panel bg-white/3 rounded-xl p-6 flex flex-col justify-between border border-white/10">
+          <div className="bg-white rounded-xl p-6 flex flex-col justify-between border border-slate-200/80 shadow-[0_4px_12px_rgba(0,0,0,0.03)]">
             <div>
-              <p className="text-xs text-white/50 uppercase tracking-widest font-bold font-headline mb-4">
+              <p className="text-xs text-slate-500 uppercase tracking-widest font-bold font-headline mb-4">
                 System Health
               </p>
               <div className="space-y-4">
-                <div className="flex justify-between items-center text-sm border-b border-white/5 pb-2">
-                  <span className="text-white/60 font-medium font-sans">Edge AI Core</span>
+                <div className="flex justify-between items-center text-sm border-b border-slate-100 pb-2">
+                  <span className="text-slate-600 font-medium font-sans">Edge AI Core</span>
                   <span className="text-primary-fixed-dim font-bold">Optimal</span>
                 </div>
-                <div className="flex justify-between items-center text-sm border-b border-white/5 pb-2">
-                  <span className="text-white/60 font-medium font-sans">Bin Connectivity</span>
+                <div className="flex justify-between items-center text-sm border-b border-slate-100 pb-2">
+                  <span className="text-slate-600 font-medium font-sans">Bin Connectivity</span>
                   <span className="text-primary-fixed-dim font-bold">Stable</span>
                 </div>
                 <div className="flex justify-between items-center text-sm pb-2">
-                  <span className="text-white/60 font-medium font-sans">Cloud API</span>
+                  <span className="text-slate-600 font-medium font-sans">Cloud API</span>
                   <span className="text-[#f3bb34] font-bold">Latency +12ms</span>
                 </div>
               </div>
             </div>
             
-            <div className="pt-4 mt-6 border-t border-white/5 flex gap-2">
+            <div className="pt-4 mt-6 border-t border-slate-100 flex gap-2">
               <div className="flex-1 h-1 bg-[#1f995c] rounded-full pulse-dot"></div>
               <div className="flex-1 h-1 bg-[#1f995c] rounded-full"></div>
-              <div className="flex-1 h-1 bg-white/10 rounded-full"></div>
+              <div className="flex-1 h-1 bg-slate-200 rounded-full"></div>
             </div>
           </div>
         </div>
@@ -493,44 +493,44 @@ export default function DashboardView({
 
       {/* Transaction Details Modal */}
       {selectedTx && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-300">
-          <div className="glass-panel bg-[#141824] border border-white/10 rounded-2xl p-6 max-w-sm w-full text-left relative animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-300">
+          <div className="bg-white border border-slate-200 shadow-2xl rounded-2xl p-6 max-w-sm w-full text-left relative animate-in zoom-in-95 duration-200 text-slate-800">
             <button 
               onClick={() => setSelectedTx(null)}
-              className="absolute top-4 right-4 text-on-surface-variant hover:text-white transition-colors"
+              className="absolute top-4 right-4 text-slate-400 hover:text-slate-600 transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
-
-            <h3 className="font-headline text-lg font-bold text-white mb-6 flex items-center gap-2">
+ 
+            <h3 className="font-headline text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
               <CheckCircle2 className="w-5 h-5 text-primary-fixed-dim" />
               Rincian Transaksi
             </h3>
-
+ 
             <div className="space-y-4">
-              <div className="flex justify-between border-b border-white/5 pb-2">
-                <span className="text-xs text-on-surface-variant">Jenis Setoran</span>
-                <span className="text-xs text-white font-bold">{selectedTx.title}</span>
+              <div className="flex justify-between border-b border-slate-100 pb-2">
+                <span className="text-xs text-slate-500 font-semibold">Jenis Setoran</span>
+                <span className="text-xs text-slate-800 font-bold">{selectedTx.title}</span>
               </div>
-              <div className="flex justify-between border-b border-white/5 pb-2">
-                <span className="text-xs text-on-surface-variant">Jumlah</span>
-                <span className="text-xs text-white font-bold">{selectedTx.count} Unit</span>
+              <div className="flex justify-between border-b border-slate-100 pb-2">
+                <span className="text-xs text-slate-500 font-semibold">Jumlah</span>
+                <span className="text-xs text-slate-800 font-bold">{selectedTx.count} Unit</span>
               </div>
-              <div className="flex justify-between border-b border-white/5 pb-2">
-                <span className="text-xs text-on-surface-variant">Waktu</span>
-                <span className="text-xs text-white font-mono">{selectedTx.date} @ {selectedTx.time}</span>
+              <div className="flex justify-between border-b border-slate-100 pb-2">
+                <span className="text-xs text-slate-500 font-semibold">Waktu</span>
+                <span className="text-xs text-slate-800 font-mono font-semibold">{selectedTx.date} @ {selectedTx.time}</span>
               </div>
               <div className="flex justify-between pb-2">
-                <span className="text-xs text-on-surface-variant">Status Jaringan</span>
-                <span className="text-[10px] bg-primary/20 text-primary-fixed-dim px-2 py-0.5 rounded font-bold uppercase">
+                <span className="text-xs text-slate-500 font-semibold">Status Jaringan</span>
+                <span className="text-[10px] bg-primary-container text-primary px-2 py-0.5 rounded font-bold uppercase">
                   {selectedTx.status} Verified
                 </span>
               </div>
             </div>
-
+ 
             <button
               onClick={() => setSelectedTx(null)}
-              className="w-full mt-6 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 text-on-surface hover:text-white rounded-lg text-xs font-bold transition-all"
+              className="w-full mt-6 py-2.5 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-800 rounded-lg text-xs font-bold transition-all"
             >
               Tutup Rincian
             </button>

@@ -211,12 +211,12 @@ export default function AnalyticsView({ binCapacities }: AnalyticsViewProps) {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
         {/* Central Analytics Donut Card (7-cols) */}
-        <div className="lg:col-span-7 glass-panel rounded-2xl p-6 relative overflow-hidden flex flex-col min-h-[440px] border border-white/10 justify-between">
+        <div className="lg:col-span-7 bg-white border border-slate-200/80 rounded-2xl p-6 relative overflow-hidden flex flex-col min-h-[440px] justify-between shadow-[0_4px_12px_rgba(0,0,0,0.03)]">
           <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
           
           <div className="flex justify-between items-start mb-6">
             <div>
-              <h2 className="font-headline text-lg font-bold text-white leading-snug">
+              <h2 className="font-headline text-lg font-bold text-slate-800 leading-snug">
                 Waste Distribution
               </h2>
               <p className="text-[11px] text-on-surface-variant tracking-wider uppercase font-semibold">
@@ -224,9 +224,9 @@ export default function AnalyticsView({ binCapacities }: AnalyticsViewProps) {
               </p>
             </div>
             
-            <div className="flex items-center gap-2 bg-white/5 border border-white/5 rounded-lg px-3 py-1 font-headline">
+            <div className="flex items-center gap-2 bg-slate-100 border border-slate-200 rounded-lg px-3 py-1 font-headline">
               <span className="w-1.5 h-1.5 rounded-full bg-primary-fixed-dim pulse-dot"></span>
-              <span className="text-[9px] font-extrabold text-primary uppercase tracking-widest leading-none">
+              <span className="text-[9px] font-extrabold text-[#1f995c] uppercase tracking-widest leading-none">
                 SIPESAT Edge Sync
               </span>
             </div>
@@ -236,7 +236,7 @@ export default function AnalyticsView({ binCapacities }: AnalyticsViewProps) {
           <div className="flex-1 flex flex-col md:flex-row items-center justify-around gap-6 py-4">
             <div className="relative w-52 h-52 shrink-0">
               <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-                <circle className="text-white/5" cx="50" cy="50" fill="transparent" r="40" stroke="currentColor" strokeWidth="12"></circle>
+                <circle className="text-slate-100" cx="50" cy="50" fill="transparent" r="40" stroke="currentColor" strokeWidth="12"></circle>
                 
                 {processedSegments.map((s) => (
                   <circle 
@@ -265,14 +265,14 @@ export default function AnalyticsView({ binCapacities }: AnalyticsViewProps) {
                 <span className="text-[10px] text-on-surface-variant font-extrabold uppercase tracking-widest font-headline">
                   Total Weight
                 </span>
-                <span className="text-3xl font-black text-white font-headline mt-0.5">
+                <span className="text-3xl font-black text-slate-800 font-headline mt-0.5">
                   {totalWeight}<span className="text-sm font-medium text-on-surface-variant ml-0.5">kg</span>
                 </span>
               </div>
             </div>
 
             {/* Grid display stats */}
-            <div className="grid grid-cols-2 gap-3 w-full md:w-auto">
+            <div className="grid grid-cols-2 gap-3 w-full md:w-auto text-slate-800">
               {processedSegments.map((s) => (
                 <div 
                   key={s.id}
@@ -280,19 +280,19 @@ export default function AnalyticsView({ binCapacities }: AnalyticsViewProps) {
                   onMouseLeave={() => setHoveredSegment(null)}
                   className={`p-3.5 rounded-xl border transition-all cursor-pointer ${
                     hoveredSegment === s.id 
-                      ? 'bg-white/10 border-white/20 scale-102 shadow-[0_0_15px_rgba(255,255,255,0.05)]' 
-                      : 'bg-white/5 border-white/5'
+                      ? 'bg-slate-100 border-slate-300 scale-102 shadow-[0_4px_12px_rgba(0,0,0,0.02)]' 
+                      : 'bg-slate-50 border-slate-150'
                   }`}
                   style={{ borderLeft: `4px solid ${s.color}` }}
                 >
-                  <p className="font-headline text-xs text-on-surface font-semibold">
+                  <p className="font-headline text-xs text-slate-800 font-semibold">
                     {s.name}
                   </p>
                   <div className="flex items-baseline gap-1.5 mt-1">
-                    <p className="text-lg font-black text-white">
+                    <p className="text-lg font-black text-slate-800">
                       {s.value}%
                     </p>
-                    <p className="text-[10px] text-on-surface-variant font-mono">
+                    <p className="text-[10px] text-on-surface-variant font-mono font-bold">
                       ({s.currentCount} pcs)
                     </p>
                   </div>
@@ -306,28 +306,28 @@ export default function AnalyticsView({ binCapacities }: AnalyticsViewProps) {
         <div className="lg:col-span-5 flex flex-col gap-6">
           
           {/* Main Evaluation Recommendation Box */}
-          <div className="glass-panel rounded-2xl p-6 border border-primary/20 bg-white/3 card-gradient relative group hover:border-primary/40 transition-all cursor-pointer overflow-hidden neon-glow-primary">
+          <div className="bg-white rounded-2xl p-6 border border-primary/25 card-gradient relative group hover:border-primary/45 transition-all cursor-pointer overflow-hidden shadow-[0_4px_15px_rgba(31,153,92,0.08)]">
             <div className="absolute -top-12 -right-12 w-32 h-32 bg-primary/10 rounded-full blur-[40px] pointer-events-none group-hover:bg-primary/20 transition-all duration-500"></div>
             
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                <Cpu className="w-5 h-5 text-primary-fixed-dim" />
+                <Cpu className="w-5 h-5 text-[#1f995c]" />
               </div>
-              <h3 className="font-headline text-lg font-black text-primary-fixed-dim tracking-tight">
+              <h3 className="font-headline text-lg font-black text-[#1f995c] tracking-tight">
                 Evaluasi SIPESAT
               </h3>
             </div>
 
-            <p className="font-sans text-[15px] leading-relaxed text-on-surface">
+            <p className="font-sans text-[15px] leading-relaxed text-slate-800 font-semibold">
               {getAIEvaluation()}
             </p>
 
-            <div className="flex items-center gap-4 pt-5 mt-5 border-t border-white/10">
+            <div className="flex items-center gap-4 pt-5 mt-5 border-t border-slate-100">
               <div className="flex -space-x-1.5">
-                <span className="w-6 h-6 rounded-full bg-secondary-fixed-dim/20 border border-secondary-fixed-dim/40 flex items-center justify-center text-[10px] text-secondary-fixed-dim font-bold">
+                <span className="w-6 h-6 rounded-full bg-secondary-container border border-secondary/20 flex items-center justify-center text-[10px] text-secondary font-bold">
                   IoT
                 </span>
-                <span className="w-6 h-6 rounded-full bg-primary-fixed-dim/20 border border-primary-fixed-dim/40 flex items-center justify-center text-[10px] text-primary-fixed-dim font-bold">
+                <span className="w-6 h-6 rounded-full bg-primary-container border border-primary/20 flex items-center justify-center text-[10px] text-primary font-bold">
                   AI
                 </span>
               </div>
@@ -338,8 +338,8 @@ export default function AnalyticsView({ binCapacities }: AnalyticsViewProps) {
           </div>
 
           {/* Node sync status cards */}
-          <div className="glass-panel rounded-2xl p-5 border border-white/5">
-            <div className="flex justify-between items-center mb-4 pb-2 border-b border-white/5">
+          <div className="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-[0_4px_12px_rgba(0,0,0,0.03)]">
+            <div className="flex justify-between items-center mb-4 pb-2 border-b border-slate-100">
               <span className="text-[10px] uppercase tracking-wider font-extrabold text-on-surface-variant font-headline">
                 SIPESAT LOCAL NETWORKS
               </span>
@@ -348,15 +348,15 @@ export default function AnalyticsView({ binCapacities }: AnalyticsViewProps) {
 
             <div className="space-y-2.5">
               {nodeStatuses.map((node) => (
-                <div key={node.id} className="flex items-center justify-between p-3 rounded-lg bg-white/5 border border-white/5">
+                <div key={node.id} className="flex items-center justify-between p-3 rounded-lg bg-slate-50 border border-slate-200/50">
                   <div className="flex items-center gap-3">
                     <span className={`w-2 h-2 rounded-full ${node.colorClass} pulse-dot`}></span>
-                    <span className="text-xs font-semibold text-white font-headline">
+                    <span className="text-xs font-bold text-slate-800 font-headline">
                       {node.name}
                     </span>
                   </div>
                   <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded ${
-                    node.status === 'ONLINE' ? 'bg-primary/10 text-primary' : 'bg-secondary/10 text-secondary'
+                    node.status === 'ONLINE' ? 'bg-primary-container text-[#1f995c]' : 'bg-secondary-container text-secondary'
                   }`}>
                     {node.status}
                   </span>
@@ -371,12 +371,12 @@ export default function AnalyticsView({ binCapacities }: AnalyticsViewProps) {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
         
         {/* Recyling rate */}
-        <div className="glass-panel bg-white/3 card-gradient rounded-xl p-5 flex flex-col justify-between border border-white/5">
+        <div className="bg-white card-gradient rounded-xl p-5 flex flex-col justify-between border border-slate-200/80 shadow-[0_4px_12px_rgba(0,0,0,0.03)]">
           <div>
             <span className="text-[9px] font-extrabold text-on-surface-variant uppercase tracking-widest font-headline">
               Recycling Rate
             </span>
-            <h4 className="text-2xl font-black text-primary-fixed-dim mt-1">
+            <h4 className="text-2xl font-black text-[#1f995c] mt-1">
               +{recyclingRate}%
             </h4>
           </div>
@@ -389,12 +389,12 @@ export default function AnalyticsView({ binCapacities }: AnalyticsViewProps) {
         </div>
 
         {/* CO2 Offset */}
-        <div className="glass-panel bg-white/3 card-gradient rounded-xl p-5 flex flex-col justify-between border border-white/5">
+        <div className="bg-white card-gradient rounded-xl p-5 flex flex-col justify-between border border-slate-200/80 shadow-[0_4px_12px_rgba(0,0,0,0.03)]">
           <div>
             <span className="text-[9px] font-extrabold text-on-surface-variant uppercase tracking-widest font-headline">
               CO2 Offset
             </span >
-            <h4 className="text-2xl font-black text-secondary-fixed-dim mt-1">
+            <h4 className="text-2xl font-black text-secondary mt-1">
               {co2Offset}<span className="text-xs font-normal text-on-surface-variant ml-0.5">kg</span>
             </h4>
           </div>
@@ -407,19 +407,19 @@ export default function AnalyticsView({ binCapacities }: AnalyticsViewProps) {
         </div>
 
         {/* Energy Saved */}
-        <div className="glass-panel rounded-xl p-5 flex flex-col justify-between border border-white/5">
+        <div className="bg-white rounded-xl p-5 flex flex-col justify-between border border-slate-200/80 shadow-[0_4px_12px_rgba(0,0,0,0.03)]">
           <div>
             <span className="text-[9px] font-extrabold text-on-surface-variant uppercase tracking-widest font-headline">
               Energy Saved
             </span>
-            <h4 className="text-2xl font-black text-white mt-1">
+            <h4 className="text-2xl font-black text-slate-800 mt-1">
               {energySaved}<span className="text-xs font-normal text-on-surface-variant ml-0.5">kWh</span>
             </h4>
           </div>
-          <div className="h-12 w-full mt-4 bg-white/5 rounded-lg relative overflow-hidden">
+          <div className="h-12 w-full mt-4 bg-slate-50 rounded-lg relative overflow-hidden">
             <svg className="w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 20">
-              <path className="text-white/10" d="M0 20 L0 10 Q30 20 60 10 T100 15 L100 20 Z" fill="currentColor"></path>
-              <path className="text-white/20" d="M0 20 L0 12 Q30 18 60 12 T100 17 L100 20 Z" fill="currentColor"></path>
+              <path className="text-slate-200/40" d="M0 20 L0 10 Q30 20 60 10 T100 15 L100 20 Z" fill="currentColor"></path>
+              <path className="text-slate-200/75" d="M0 20 L0 12 Q30 18 60 12 T100 17 L100 20 Z" fill="currentColor"></path>
             </svg>
           </div>
         </div>

@@ -246,22 +246,22 @@ export default function App() {
       
       {/* Decorative Atmosphere elements */}
       <div className="fixed inset-0 z-0 pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-[400px] h-[400px] bg-primary-container/5 rounded-full blur-[120px] floating-orb"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-secondary-container/5 rounded-full blur-[150px] floating-orb-delayed"></div>
-        <div className="absolute top-1/2 right-1/3 w-[300px] h-[300px] bg-primary-fixed-dim/5 rounded-full blur-[100px] floating-orb" style={{ animationDelay: '-5s' }}></div>
+        <div className="absolute top-1/4 left-1/4 w-[400px] h-[400px] bg-primary-container/20 rounded-full blur-[120px] floating-orb"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-secondary-container/20 rounded-full blur-[150px] floating-orb-delayed"></div>
+        <div className="absolute top-1/2 right-1/3 w-[300px] h-[300px] bg-primary-fixed-dim/15 rounded-full blur-[100px] floating-orb" style={{ animationDelay: '-5s' }}></div>
       </div>
 
       {/* Embedded grid mesh background decoration */}
-      <div className="fixed inset-0 z-[-1] opacity-[0.06] pointer-events-none" style={{ backgroundImage: 'radial-gradient(#1f995c 0.5px, transparent 0.5px)', backgroundSize: '32px 32px' }}></div>
+      <div className="fixed inset-0 z-[-1] opacity-[0.08] pointer-events-none" style={{ backgroundImage: 'radial-gradient(#1f995c 0.5px, transparent 0.5px)', backgroundSize: '32px 32px' }}></div>
 
       {/* Floating active deposit simulation toast */}
       {alertToast && (
-        <div className="fixed bottom-20 left-1/2 -translate-x-1/2 md:bottom-6 md:left-auto md:right-6 md:translate-x-0 z-[100] max-w-sm w-full p-4 rounded-xl bg-[#141824] border border-[#1f995c]/40 text-on-surface flex items-center gap-3 shadow-[0_0_20px_rgba(31,153,92,0.15)] animate-in slide-in-from-bottom-2 duration-300">
-          <div className="w-8 h-8 rounded-full bg-primary-fixed-dim/15 flex items-center justify-center shrink-0">
-            <Sparkles className="w-4.5 h-4.5 text-primary-fixed-dim" />
+        <div className="fixed bottom-20 left-1/2 -translate-x-1/2 md:bottom-6 md:left-auto md:right-6 md:translate-x-0 z-[100] max-w-sm w-full p-4 rounded-xl bg-white border border-[#1f995c]/25 text-on-surface flex items-center gap-3 shadow-[0_4px_20px_rgba(31,153,92,0.12)] animate-in slide-in-from-bottom-2 duration-300">
+          <div className="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center shrink-0">
+            <Sparkles className="w-4.5 h-4.5 text-primary" />
           </div>
           <div>
-            <p className="text-xs font-bold text-white">SIPESAT AI Verified</p>
+            <p className="text-xs font-bold text-slate-800">SIPESAT AI Verified</p>
             <p className="text-[11px] text-on-surface-variant mt-0.5">{alertToast}</p>
           </div>
         </div>
@@ -357,7 +357,7 @@ export default function App() {
 
         {/* Bottom Bar Responsive Navigation (Mobile Screen size only) */}
         {hasEntered && (
-          <nav className="fixed bottom-0 left-0 w-full z-50 md:hidden bg-[#0C0F14]/95 backdrop-blur-lg border-t border-white/10 flex justify-around items-center h-16 shadow-[0_-4px_20px_rgba(0,0,0,0.5)]">
+          <nav className="fixed bottom-0 left-0 w-full z-50 md:hidden bg-white/95 backdrop-blur-lg border-t border-black/5 flex justify-around items-center h-16 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
             <button 
               onClick={() => setCurrentView('dashboard')}
               className={`flex flex-col items-center justify-center p-2 transition-transform duration-150 active:scale-90 outline-none ${

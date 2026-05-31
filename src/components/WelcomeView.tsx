@@ -66,7 +66,7 @@ export default function WelcomeView({ onEnter }: WelcomeViewProps) {
         {/* Enter Dashboard Button */}
         <button
           onClick={onEnter}
-          className="group relative px-8 py-4 bg-primary-fixed-dim text-on-primary-fixed font-headline text-base font-black rounded-xl transition-all duration-300 neon-glow-primary neon-glow-primary-hover active:scale-95 flex items-center gap-3 cursor-pointer mb-16 shadow-[0_0_25px_rgba(74,222,128,0.15)]"
+          className="group relative px-8 py-4 bg-primary-fixed-dim text-white font-headline text-base font-black rounded-xl transition-all duration-300 neon-glow-primary neon-glow-primary-hover active:scale-95 flex items-center gap-3 cursor-pointer mb-16 shadow-[0_4px_20px_rgba(31,153,92,0.15)]"
         >
           <span>Masuk ke Dashboard</span>
           <ArrowRight className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" />
@@ -75,10 +75,10 @@ export default function WelcomeView({ onEnter }: WelcomeViewProps) {
         {/* Support By Header */}
         <div className="w-full text-center mb-6 relative">
           <div className="absolute inset-0 flex items-center" aria-hidden="true">
-            <div className="w-full border-t border-white/5"></div>
+            <div className="w-full border-t border-slate-200/50"></div>
           </div>
           <div className="relative flex justify-center">
-            <span className="bg-[#0b0f17]/95 px-6 text-[11px] uppercase tracking-[0.2em] font-extrabold text-primary-fixed-dim font-headline">
+            <span className="bg-background/95 px-6 text-[11px] uppercase tracking-[0.2em] font-extrabold text-[#1f995c] font-headline">
               Support By :
             </span>
           </div>
