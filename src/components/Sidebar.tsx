@@ -39,7 +39,7 @@ export default function Sidebar({
         <div className="flex items-center gap-2 mb-2">
           <img 
             alt="SIPESAT Logo" 
-            className="h-8 w-auto object-contain drop-shadow-[0_0_8px_rgba(42,229,0,0.3)] animate-pulse" 
+            className="h-8 w-auto object-contain drop-shadow-[0_0_8px_rgba(31,153,92,0.3)] animate-pulse" 
             src={logoUrl} 
             referrerPolicy="no-referrer"
           />
@@ -73,7 +73,7 @@ export default function Sidebar({
                 onClick={() => onChangeView(item.id)}
                 className={`w-full flex items-center gap-4 px-5 py-3.5 rounded-lg font-headline transition-all duration-300 ${
                   isActive
-                    ? 'bg-primary/10 text-primary border-l-4 border-primary shadow-[inset_1px_1px_4px_rgba(42,229,0,0.1)]'
+                    ? 'bg-primary/10 text-primary border-l-4 border-primary shadow-[inset_1px_1px_4px_rgba(31,153,92,0.1)]'
                     : 'text-on-surface-variant hover:text-on-surface hover:bg-white/5'
                 }`}
               >

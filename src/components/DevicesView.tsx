@@ -277,7 +277,7 @@ export default function DevicesView({
               {/* Configure Trigger Button */}
               <button
                 onClick={() => setShowConfigLocal(true)}
-                className="w-full mt-6 py-3 px-6 bg-primary-container text-on-primary font-headline text-xs font-bold rounded-xl shadow-[0_0_12px_rgba(42,229,0,0.1)] hover:shadow-[0_0_20px_rgba(42,229,0,0.4)] hover:scale-101 active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full mt-6 py-3 px-6 bg-primary-container text-on-primary font-headline text-xs font-bold rounded-xl shadow-[0_0_12px_rgba(31,153,92,0.1)] hover:shadow-[0_0_20px_rgba(31,153,92,0.4)] hover:scale-101 active:scale-98 transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
                 <Settings className="w-4.5 h-4.5" />
                 System Configuration

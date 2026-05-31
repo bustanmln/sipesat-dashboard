@@ -90,7 +90,7 @@ export default function LoginView({ onLoginSuccess }: LoginViewProps) {
             <div className="absolute inset-0 bg-primary-container/20 rounded-full blur-xl scale-125"></div>
             <img 
               alt="SIPESAT Logo" 
-              className="w-20 h-20 object-contain drop-shadow-[0_0_15px_rgba(42,229,0,0.45)] relative z-10" 
+              className="w-20 h-20 object-contain drop-shadow-[0_0_15px_rgba(31,153,92,0.45)] relative z-10" 
               src={sipesatLogo}
               referrerPolicy="no-referrer"
             />
